@@ -1,0 +1,3058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Injury Risk Prediction Portal</title>
+    <link rel="stylesheet" href="/static/css/sport.css">
+    <link rel="icon" href="/static/img/logo.svg" type="image/svg+xml">
+    <style>
+        /* Reset so <button> nav items look like the <a> links they replaced.
+           If sport.css already styles `.nav-links a` / `.sidebar a` with
+           padding, hover states, etc., copy those same rules onto
+           `.nav-btn` so buttons and links match exactly. */
+        .nav-btn {
+            background: none;
+            border: none;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+            text-align: left;
+            padding: 0;
+            display: inline;
+        }
+        .sidebar .nav-btn {
+            display: block;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <div class="container">
+                <div class="hero">
+                    <div class="hero-brand">
+                        <img class="logo-mark" src="/static/img/logo.svg" alt="AthletePulse logo">
+                        <div>
+                            <div class="title">AthletePulse</div>
+                            <p>Monitor, predict, and prevent sports injuries</p>
+                        </div>
+                    </div>
+                    <div class="nav-links">
+                        <div id="athlete-top-nav" class="hidden">
+                            <button type="button" class="nav-btn" onclick="showPage('dashboard')">Overview</button>
+                            <button type="button" class="nav-btn" onclick="showPage('profile')">Profile</button>
+                            <button type="button" class="nav-btn" onclick="showPage('exercise')">Exercises</button>
+                            <button type="button" class="nav-btn" onclick="showPage('assessment')">Assessments</button>
+                            <button type="button" class="nav-btn" onclick="showPage('my-coach')">My Coach</button>
+                        </div>
+
+                        <div id="coach-top-nav" class="hidden">
+                            <button type="button" class="nav-btn" onclick="showPage('coach-dashboard-view')">Overview</button>
+                            <button type="button" class="nav-btn" onclick="showPage('coach-athletes')">My Athletes</button>
+                            <button type="button" class="nav-btn" onclick="showPage('coach-requests')">Pending Requests</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+ 
+        <!-- Authentication Section (shown when logged out) -->
+        <div id="auth-page" class="tab-content active container">
+            <div class="feature-strip">
+                <div class="feature-pill">
+                    <span class="feature-icon">⚡</span>
+                    <div><strong>Real-time insights</strong><span>Track injury risk instantly</span></div>
+                </div>
+                <div class="feature-pill">
+                    <span class="feature-icon">🏃</span>
+                    <div><strong>Smarter training</strong><span>Log every session with ease</span></div>
+                </div>
+                <div class="feature-pill">
+                    <span class="feature-icon">🤝</span>
+                    <div><strong>Coach-ready views</strong><span>Share progress without friction</span></div>
+                </div>
+            </div>
+            {% include 'partials/auth_forms.html' %}
+        </div>
+ 
+        <!-- Main Dashboard Layout (shown when logged in) -->
+        <div id="dashboard-wrapper" class="hidden">
+            <div class="site-shell">
+                <!-- Sidebar Navigation -->
+                <aside class="sidebar">
+
+    <!-- Athlete navigation -->
+    <div id="athlete-sidebar" class="hidden">
+        <h4>Navigation</h4>
+
+        <button type="button" class="nav-btn"
+                onclick="showPage('dashboard')">
+            Overview
+        </button>
+
+        <button type="button" class="nav-btn"
+                onclick="showPage('profile')">
+            Profile
+        </button>
+
+        <button type="button" class="nav-btn"
+                onclick="showPage('exercise')">
+            Exercises
+        </button>
+
+        <button type="button" class="nav-btn"
+                onclick="showPage('assessment')">
+            Assessments
+        </button>
+
+        <button type="button" class="nav-btn"
+                onclick="showPage('my-coach')">
+            My Coach
+        </button>
+
+        <hr style="margin:12px 0;border-color:rgba(255,255,255,0.03)">
+
+        <h4>Quick Actions</h4>
+
+        <button type="button" class="nav-btn"
+                onclick="showPage('assessment')">
+            Run Assessment
+        </button>
+     </div>
+
+     <!-- Coach navigation -->
+     <div id="coach-sidebar" class="hidden">
+        <h4>Coach Navigation</h4>
+
+        <button type="button" class="nav-btn"
+                onclick="showPage('coach-dashboard-view')">
+            Overview
+        </button>
+
+        <button type="button" class="nav-btn"
+                onclick="showPage('coach-athletes')">
+            My Athletes
+        </button>
+
+        <button type="button" class="nav-btn"
+                onclick="showPage('coach-requests')">
+            Pending Requests
+        </button>
+     </div>
+
+     <hr style="margin:12px 0;border-color:rgba(255,255,255,0.03)">
+
+     <button type="button" class="nav-btn"
+            onclick="confirmLogout()">
+        Logout
+     </button>
+
+                </aside>
+ 
+                <!-- Main Content Area -->
+                <div class="main-area">
+ 
+                    <!-- Athlete Dashboard -->
+                    <div id="athlete-dashboard" class="tab-content hidden">
+                        <div class="nav-links">
+                            <span id="user-welcome"></span>
+                        </div>
+ 
+                <!-- Dashboard Overview -->
+                <div id="dashboard-overview">
+                    <div class="dashboard">
+                        <div class="card" id="overall-status-card">
+                            <h3>Overall Status</h3>
+                            <div class="card-value" id="status-emoji">✅</div>
+                            <div class="card-label" id="status-text">Monitoring...</div>
+                        </div>
+                        <div class="card">
+                            <h3>Latest Risk Score</h3>
+                            <div class="card-value" id="latest-risk">--</div>
+                            <div class="card-label">Injury Risk %</div>
+                        </div>
+                        <div class="card">
+                            <h3>Exercises This Week</h3>
+                            <div class="card-value" id="weekly-exercises">0</div>
+                            <div class="card-label">Sessions Logged</div>
+                        </div>
+                        <div class="card">
+                            <h3>BMI</h3>
+                            <div class="card-value" id="bmi-value">--</div>
+                            <div class="card-label" id="bmi-status"></div>
+                        </div>
+                    </div>
+                    <!-- Widgets: small charts -->
+                    <div class="widgets" style="margin-top:18px">
+                        <div class="chart-placeholder">
+                            <h4 style="color:#fff">Risk Trend (30 days)</h4>
+                            <canvas id="risk-history-chart" width="400" height="160"></canvas>
+                        </div>
+                        <div class="chart-placeholder">
+                            <h4 style="color:#fff">Weekly Sessions (7 days)</h4>
+                            <canvas id="exercises-chart" width="400" height="160"></canvas>
+                        </div>
+                        <div class="chart-placeholder">
+                            <h4 style="color:#fff">Training Intensity</h4>
+                            <canvas id="training-intensity-chart" width="180" height="120"></canvas>
+                        </div>
+                    </div>
+                </div>
+ 
+                <!-- Pages -->
+                <div id="profile-page" class="tab-content hidden">
+                    <div class="profile-section">
+                        <h3>My Profile</h3>
+                        <div id="profile-alert"></div>
+                        <form onsubmit="handleProfileUpdate(event)">
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="profile-firstname">First Name</label>
+                                    <input type="text" id="profile-firstname" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-lastname">Last Name</label>
+                                    <input type="text" id="profile-lastname" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="profile-age">Age</label>
+                                    <input type="number" id="profile-age" min="1" max="120" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-height">Height (cm)</label>
+                                    <input type="number" id="profile-height" step="0.1" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-weight">Weight (kg)</label>
+                                    <input type="number" id="profile-weight" step="0.1" min="1" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="profile-sport">Sport</label>
+                                    <select id="profile-sport" required>
+                                        <option value="football">Football</option>
+                                        <option value="basketball">Basketball</option>
+                                        <option value="running">Running</option>
+                                        <option value="tennis">Tennis</option>
+                                        <option value="volleyball">Volleyball</option>
+                                        <option value="swimming">Swimming</option>
+                                        <option value="gymnastics">Gymnastics</option>
+                                        <option value="cycling">Cycling</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-experience">Years of Experience</label>
+                                    <input type="number" id="profile-experience" min="0" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="profile-frequency">Training Frequency (times/week)</label>
+                                    <input type="number" id="profile-frequency" min="0" max="7" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="profile-injury">Injury History (if any)</label>
+                                <textarea id="profile-injury" rows="3" placeholder="Describe any previous injuries"></textarea>
+                            </div>
+                            <button type="submit">Save Profile</button>
+                        </form>
+                    </div>
+                </div>
+ 
+                <div id="exercise-page" class="tab-content hidden">
+                    <div class="profile-section">
+                        <h3>Log Exercise Session</h3>
+                        <div id="exercise-alert"></div>
+                        <form onsubmit="handleExerciseLog(event)">
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="exercise-date">Date</label>
+                                    <input type="date" id="exercise-date" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="exercise-type">Exercise Type</label>
+                                    <input type="text" id="exercise-type" placeholder="e.g., Running, Weightlifting" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="exercise-duration">Duration (minutes)</label>
+                                    <input type="number" id="exercise-duration" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="exercise-intensity">
+                                        Training Intensity (1-10)
+                                    </label>
+                                    <input
+                                        type="number"
+                                        id="exercise-intensity"
+                                        min="1"
+                                        max="10"
+                                        step="0.1"
+                                        placeholder="e.g., 7.5"
+                                        required
+                                    >
+                                    <small>
+                                        1 = very light, 10 = maximum effort
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label for="exercise-distance">Distance (km) - Optional</label>
+                                    <input type="number" id="exercise-distance" step="0.1" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="exercise-calories">Calories Burned - Optional</label>
+                                    <input type="number" id="exercise-calories" min="0">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="exercise-notes">Notes</label>
+                                <textarea id="exercise-notes" rows="2" placeholder="Add any notes about this session"></textarea>
+                            </div>
+                            <button type="submit" id="exercise-submit-btn">Log Exercise</button>
+                            <button
+                                type="button"
+                                id="exercise-cancel-edit-btn"
+                                class="secondary-button hidden"
+                                onclick="cancelExerciseEdit()"
+                                style="margin-left: 8px; display: none;"
+                            >
+                                Cancel Edit
+                            </button>
+                        </form>
+ 
+                        <h3 style="margin-top: 40px;">Exercise History</h3>
+                        <div id="exercise-list"></div>
+                    </div>
+                </div>
+                <div id="assessment-page" class="tab-content hidden">
+    <div class="profile-section">
+        <h3>Injury Risk Assessment</h3>
+        <div id="assessment-alert"></div>
+
+        <div class="alert warning" style="margin-bottom: 18px;">
+            <strong>Recent training required:</strong>
+            Log at least one exercise session from the last 7 days before running an assessment.
+            The assessment uses your recent training duration and intensity together with your
+            current condition.
+        </div>
+
+        <div class="assessment-form">
+
+    <div class="row">
+        <div class="form-group">
+            <label for="assessment-gender">Gender</label>
+            <select id="assessment-gender" required>
+                <option value="0">Female</option>
+                <option value="1">Male</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="assessment-warmup">Warm-up Time (minutes)</label>
+            <input type="number" id="assessment-warmup" min="0" required>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label for="assessment-sleep">Sleep Hours</label>
+            <input type="number" id="assessment-sleep" min="0" max="24" step="0.1" required>
+        </div>
+
+        <div class="form-group">
+            <label for="assessment-stress">Stress Level (1-10)</label>
+            <input type="number" id="assessment-stress" min="1" max="10" required>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label for="assessment-flexibility">Flexibility Score</label>
+            <input type="number" id="assessment-flexibility" min="0" max="100" step="0.1" required>
+        </div>
+
+        <div class="form-group">
+            <label for="assessment-asymmetry">Muscle Asymmetry</label>
+            <input type="number" id="assessment-asymmetry" min="0" step="0.1" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="assessment-recovery">Recovery Time (hours)</label>
+        <input type="number" id="assessment-recovery" min="0" required>
+    </div>
+
+    <button type="button" id="run-assessment-btn" onclick="runAssessment()" style="margin-bottom: 20px;">
+        Run Assessment Now
+    </button>
+
+    </div>
+       
+        <div id="assessment-loading" class="loading hidden" style="display: none;">
+            Loading...
+        </div>
+        <div id="assessment-result"></div>
+        <div id="assessment-history"></div>
+    </div>
+</div>
+
+<!-- My Coach Page -->
+<div id="my-coach-page" class="tab-content hidden">
+    <div class="profile-section">
+        <h3>My Coach</h3>
+
+        <div id="coach-connection-alert"></div>
+
+        <div id="coach-connection-content">
+            <p>Loading coach connection...</p>
+        </div>
+
+        <div style="margin-top: 24px;">
+            <h3>Coach Training Recommendations</h3>
+            <div id="athlete-training-recommendations">
+                <p>Loading recommendations...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div> <!-- Close athlete-dashboard -->
+ 
+ 
+                    <!-- Coach Dashboard -->
+                    <div id="coach-dashboard" class="tab-content hidden">
+                        <div class="nav-links">
+                            <span id="coach-welcome"></span>
+                        </div>
+ 
+                        <div id="coach-dashboard-view">
+                            <div id="coach-alert"></div>
+
+                            <div class="profile-section" style="margin-bottom: 18px;">
+                                <h3>High-Risk Alerts</h3>
+                                <div id="coach-high-risk-alerts">
+                                    <p>Loading alerts...</p>
+                                </div>
+                            </div>
+
+                            <div class="dashboard">
+                                <div class="card">
+                                    <h3>Total Athletes</h3>
+                                    <div class="card-value" id="coach-total-athletes">0</div>
+                                </div>
+                                <div class="card" id="coach-pending-card">
+                                    <h3>Pending Requests</h3>
+                                    <div class="card-value" id="coach-pending-requests">0</div>
+                                </div>
+                                <div class="card" id="coach-low-risk-card">
+                                    <h3>Low Risk</h3>
+                                    <div class="card-value" id="coach-low-risk">0</div>
+                                </div>
+                                <div class="card" id="coach-medium-risk-card">
+                                    <h3>Medium Risk</h3>
+                                    <div class="card-value" id="coach-medium-risk">0</div>
+                                </div>
+                                <div class="card" id="coach-high-risk-card">
+                                    <h3>High Risk</h3>
+                                    <div class="card-value" id="coach-high-risk">0</div>
+                                </div>
+                                <div class="card" id="coach-overtraining-card">
+                                    <h3>Overtraining</h3>
+                                    <div class="card-value" id="coach-overtraining">0</div>
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div id="coach-athletes-page" class="tab-content hidden">
+                            <div class="profile-section">
+                                <h3>Managed Athletes</h3>
+                                <div id="athletes-table-container"></div>
+                            </div>
+                        </div>
+ 
+                        <div id="coach-requests-page" class="tab-content hidden">
+                            <div class="profile-section">
+                                <h3>Pending Athlete Requests</h3>
+                                <div id="coach-requests-alert"></div>
+                                <div id="coach-requests-container">
+                                    <p>Loading requests...</p>
+                                </div>
+                            </div>
+                        </div>
+ 
+                        <div id="coach-athlete-details-page" class="tab-content hidden">
+                            <div class="profile-section">
+                                <h3>Athlete Details</h3>
+                                <button onclick="showPage('coach-athletes')" class="secondary-button">Back to Athletes</button>
+                                <div id="coach-athlete-details"></div>
+                            </div>
+                        </div>
+                    </div> <!-- Close coach-dashboard -->
+                </div> <!-- Close main-area -->
+            </div> <!-- Close site-shell -->
+        </div> <!-- Close dashboard-wrapper -->
+ 
+        <div class="footer">
+            <p>&copy; 2026 Sport Injury Risk Prediction Portal. All rights reserved.</p>
+        </div>
+    </div>
+ 
+    <script>
+        const API_BASE = '/api';
+        let authToken = localStorage.getItem('auth_token');
+        let currentUser = null;
+        let currentUserRole = null;
+        let currentUserHasProfile = false;
+        let currentCoachConnection = null;
+ 
+        // ---------- STABILITY PATCH: centralized authenticated fetch ----------
+        // Every API call goes through this. It attaches the token, and ONLY
+        // logs the user out on a real 401 (invalid/expired token) — never on
+        // a plain network failure (dropped WiFi, server unreachable, etc).
+        async function apiFetch(endpoint, options = {}) {
+            const headers = { ...(options.headers || {}) };
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+            if (options.body && !headers['Content-Type']) {
+                headers['Content-Type'] = 'application/json';
+            }
+ 
+            let response;
+            try {
+                response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+            } catch (networkError) {
+                throw new Error('NETWORK_ERROR');
+            }
+ 
+            if (response.status === 401) {
+                logout();
+                throw new Error('SESSION_EXPIRED');
+            }
+ 
+            return response;
+        }
+ 
+        // ---------- 3-STAGE RISK DISPLAY ----------
+        // New portal levels: low, medium, high.
+        // Old saved "critical" records are displayed as high.
+        function normalizeRiskLevel(riskLevel) {
+            const normalized = String(riskLevel || '').toLowerCase();
+            return normalized === 'critical' ? 'high' : normalized;
+        }
+
+        function setRiskCardColor(cardId, riskLevel) {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+
+            const level = normalizeRiskLevel(riskLevel);
+
+            card.classList.remove('success', 'warning', 'danger');
+
+            if (level === 'low') card.classList.add('success');
+            else if (level === 'medium') card.classList.add('warning');
+            else if (level === 'high') card.classList.add('danger');
+        }
+ 
+        // ---------- DASHBOARD IMPROVEMENT: auto-refresh while the dashboard is open ----------
+        let dashboardRefreshInterval = null;
+ 
+        function refreshCurrentDashboard() {
+            if (!authToken) return;
+            if (currentUserRole === 'coach') {
+                loadCoachDashboard();
+                loadCoachHighRiskAlerts();
+            } else if (currentUserHasProfile) {
+                loadAthleteData();
+            }
+        }
+ 
+        function startDashboardAutoRefresh() {
+            stopDashboardAutoRefresh();
+            // Refresh every 60s, but only while the tab is actually visible —
+            // no point burning API calls on a backgrounded tab.
+            dashboardRefreshInterval = setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    refreshCurrentDashboard();
+                }
+            }, 60000);
+        }
+ 
+        function stopDashboardAutoRefresh() {
+            if (dashboardRefreshInterval) {
+                clearInterval(dashboardRefreshInterval);
+                dashboardRefreshInterval = null;
+            }
+        }
+ 
+        // Also refresh immediately when the user tabs back in, rather than
+        // waiting for the next 60s tick.
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                refreshCurrentDashboard();
+            }
+        });
+ 
+        // ---------- DASHBOARD IMPROVEMENT: confirm before logging out ----------
+        function confirmLogout() {
+            if (confirm('Are you sure you want to log out?')) {
+                logout();
+            }
+        }
+ 
+        // Initialize
+        window.addEventListener('DOMContentLoaded', init);
+ 
+        function init() {
+            // Set today's date in exercise form
+            const exerciseDate = document.getElementById('exercise-date');
+            if (exerciseDate) {
+                exerciseDate.valueAsDate = new Date();
+            }
+            toggleAthleteFields();
+ 
+            if (authToken) {
+                validateToken();
+            }
+        }
+ 
+        function switchAuthTab(tab) {
+            document.querySelectorAll('[id$="-form"]').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            
+            if (tab === 'login') {
+                document.getElementById('login-form').classList.add('active');
+                document.querySelector('[onclick="switchAuthTab(\'login\')"]').classList.add('active');
+            } else if (tab === 'register') {
+                document.getElementById('register-form').classList.add('active');
+                document.querySelector('[onclick="switchAuthTab(\'register\')"]').classList.add('active');
+            } else if (tab === 'forgot-password') {
+                document.getElementById('forgot-password-form').classList.add('active');
+            } else if (tab === 'reset-password') {
+                document.getElementById('reset-password-form').classList.add('active');
+            }
+        }
+ 
+        function showAlert(message, type, elementId) {
+            const alertDiv = document.getElementById(elementId);
+            if (!alertDiv) return;
+            alertDiv.innerHTML = `<div class="alert ${type}">${message}</div>`;
+            setTimeout(() => {
+                alertDiv.innerHTML = '';
+            }, 5000);
+        }
+ 
+        function toggleAthleteFields() {
+            const roleElement = document.getElementById('reg-role');
+            const athleteFields = document.getElementById('athlete-registration-fields');
+            if (!roleElement || !athleteFields) return;
+            const role = roleElement.value;
+            if (role === 'athlete') {
+                athleteFields.style.display = 'block';
+                athleteFields.querySelectorAll('input, select, textarea').forEach(el => el.required = true);
+            } else {
+                athleteFields.style.display = 'none';
+                athleteFields.querySelectorAll('input, select, textarea').forEach(el => el.required = false);
+            }
+        }
+ 
+        // ---------- STABILITY PATCH: busy-state + input validation ----------
+        async function handleLogin(e) {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+ 
+            if (!email || !password) {
+                showAlert('Please enter both email and password.', 'error', 'login-alert');
+                return;
+            }
+ 
+            const originalLabel = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Logging in...';
+ 
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+ 
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token || data.accessToken || data.token || null;
+                    if (authToken) {
+                        localStorage.setItem('auth_token', authToken);
+                    }
+                    showAlert('Login successful.', 'success', 'login-alert');
+                    await validateToken();
+                } else {
+                    let message = 'Invalid credentials';
+                    try {
+                        const errorData = await response.json();
+                        message = errorData.error || message;
+                    } catch (jsonError) {
+                        console.error('Login response was not JSON:', jsonError);
+                    }
+                    showAlert(message, 'error', 'login-alert');
+                }
+            } catch (error) {
+                showAlert('Could not reach the server. Check your connection and try again.', 'error', 'login-alert');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalLabel;
+            }
+        }
+ 
+        async function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const role = document.getElementById('reg-role').value;
+ 
+            const payload = { username, email, password, role };
+ 
+            if (role === 'athlete') {
+                payload.profile = {
+                    first_name: document.getElementById('reg-firstname').value,
+                    last_name: document.getElementById('reg-lastname').value,
+                    age: parseInt(document.getElementById('reg-age').value),
+                    height: parseFloat(document.getElementById('reg-height').value),
+                    weight: parseFloat(document.getElementById('reg-weight').value),
+                    sport: document.getElementById('reg-sport').value,
+                    years_of_experience: parseInt(document.getElementById('reg-experience').value),
+                    training_frequency: parseInt(document.getElementById('reg-frequency').value),
+                    injury_history: document.getElementById('reg-injury-history').value || null,
+                    coach_email: document.getElementById('reg-coach-email').value || null
+                };
+            }
+ 
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+ 
+                const data = await response.json();
+                if (response.ok) {
+                    authToken = data.access_token || data.accessToken || data.token || null;
+                    if (authToken) localStorage.setItem('auth_token', authToken);
+                    showAlert('Registration successful! Redirecting...', 'success', 'register-alert');
+                    setTimeout(() => validateToken(), 300);
+                } else {
+                    showAlert(data.error || 'Registration failed', 'error', 'register-alert');
+                }
+            } catch (error) {
+                showAlert('Registration error: ' + error.message, 'error', 'register-alert');
+            }
+        }
+ 
+        function switchToForgotPassword(event) {
+            event.preventDefault();
+            document.querySelectorAll('[id$="-form"]').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            document.getElementById('forgot-password-form').classList.add('active');
+        }
+ 
+        async function handleForgotPassword(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+ 
+            try {
+                const response = await fetch(`${API_BASE}/auth/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+ 
+                const data = await response.json();
+                let message = data.message || 'If that email exists, a reset link has been sent.';
+                showAlert(message, 'success', 'forgot-password-alert');
+            } catch (error) {
+                showAlert('Error sending reset request: ' + error.message, 'error', 'forgot-password-alert');
+            }
+        }
+ 
+        async function handleResetPassword(e) {
+            e.preventDefault();
+            const token = document.getElementById('reset-token').value;
+            const password = document.getElementById('reset-password').value;
+ 
+            try {
+                const response = await fetch(`${API_BASE}/auth/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, password })
+                });
+ 
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert(data.message || 'Password reset successfully.', 'success', 'reset-password-alert');
+                    setTimeout(() => switchAuthTab('login'), 2000);
+                } else {
+                    showAlert(data.error || 'Could not reset password.', 'error', 'reset-password-alert');
+                }
+            } catch (error) {
+                showAlert('Error resetting password: ' + error.message, 'error', 'reset-password-alert');
+            }
+        }
+ 
+        // ---------- STABILITY PATCH: distinguishes bad-token vs bad-connection ----------
+        async function validateToken() {
+            if (!authToken) return;
+            try {
+                const response = await apiFetch('/auth/me');
+                if (response.ok) {
+                    const data = await response.json();
+                    currentUser = data.user;
+                    currentUserRole = data.user.role;
+                    currentUserHasProfile = !!data.profile;
+                    currentCoachConnection = data.coach_connection || null;
+                    showDashboard();
+ 
+                    if (currentUserRole !== 'coach' && !currentUserHasProfile) {
+                        showPage('profile');
+                        showAlert('Please complete your profile to enable assessments and exercise logging.', 'warning', 'profile-alert');
+                    }
+                } else if (!response.ok) {
+                    console.error('Unexpected /auth/me status:', response.status);
+                }
+            } catch (error) {
+                if (error.message === 'SESSION_EXPIRED') {
+                    return;
+                }
+                console.error('Could not verify session:', error);
+                showAlert('Could not reach the server to verify your session. Check your connection and refresh.', 'error', 'login-alert');
+            }
+        }
+        function showDashboard() {
+    const authPage = document.getElementById('auth-page');
+    const dashboardWrapper = document.getElementById('dashboard-wrapper');
+
+    const athleteDashboard =
+        document.getElementById('athlete-dashboard');
+
+    const coachDashboard =
+        document.getElementById('coach-dashboard');
+
+    const athleteSidebar =
+        document.getElementById('athlete-sidebar');
+
+    const coachSidebar =
+        document.getElementById('coach-sidebar');
+
+    const athleteTopNav =
+        document.getElementById('athlete-top-nav');
+
+    const coachTopNav =
+        document.getElementById('coach-top-nav');
+
+    // Hide login page and show dashboard wrapper
+    if (authPage) {
+        authPage.style.display = 'none';
+    }
+
+    if (dashboardWrapper) {
+        dashboardWrapper.classList.remove('hidden');
+        dashboardWrapper.style.display = 'block';
+    }
+
+    // Hide every role-specific section first
+    if (athleteDashboard) {
+        athleteDashboard.style.display = 'none';
+    }
+
+    if (coachDashboard) {
+        coachDashboard.style.display = 'none';
+    }
+
+    if (athleteSidebar) {
+        athleteSidebar.style.display = 'none';
+    }
+
+    if (coachSidebar) {
+        coachSidebar.style.display = 'none';
+    }
+
+    if (athleteTopNav) {
+        athleteTopNav.style.display = 'none';
+    }
+
+    if (coachTopNav) {
+        coachTopNav.style.display = 'none';
+    }
+
+    // ============================
+    // COACH DASHBOARD
+    // ============================
+    if (currentUserRole === 'coach') {
+        if (coachDashboard) {
+            coachDashboard.style.display = 'block';
+            coachDashboard.classList.remove('hidden');
+        }
+
+        if (coachSidebar) {
+            coachSidebar.style.display = 'block';
+            coachSidebar.classList.remove('hidden');
+        }
+
+        if (coachTopNav) {
+            coachTopNav.style.display = 'flex';
+            coachTopNav.classList.remove('hidden');
+        }
+
+        const coachWelcome =
+            document.getElementById('coach-welcome');
+
+        if (coachWelcome) {
+            coachWelcome.textContent =
+                `Welcome, Coach ${currentUser.username}!`;
+        }
+
+        showPage('coach-dashboard-view');
+        startDashboardAutoRefresh();
+
+        return;
+    }
+
+    // ============================
+    // ATHLETE DASHBOARD
+    // ============================
+    if (athleteDashboard) {
+        athleteDashboard.style.display = 'block';
+        athleteDashboard.classList.remove('hidden');
+    }
+
+    if (athleteSidebar) {
+        athleteSidebar.style.display = 'block';
+        athleteSidebar.classList.remove('hidden');
+    }
+
+    if (athleteTopNav) {
+        athleteTopNav.style.display = 'flex';
+        athleteTopNav.classList.remove('hidden');
+    }
+
+    const athleteWelcome =
+        document.getElementById('user-welcome');
+
+    if (athleteWelcome) {
+        athleteWelcome.textContent =
+            `Welcome, ${currentUser.username}!`;
+    }
+
+    if (!currentUserHasProfile) {
+        showPage('profile');
+
+        showAlert(
+            'Please complete your profile first.',
+            'warning',
+            'profile-alert'
+        );
+    } else {
+        showPage('dashboard');
+        loadAthleteData();
+
+        if (typeof loadAthleteCharts === 'function') {
+            loadAthleteCharts();
+        }
+
+        startDashboardAutoRefresh();
+    }
+}
+
+        function showPage(page) {
+            const dashboardOverview = document.getElementById('dashboard-overview');
+            const profilePage = document.getElementById('profile-page');
+            const exercisePage = document.getElementById('exercise-page');
+            const assessmentPage = document.getElementById('assessment-page');
+            const myCoachPage = document.getElementById('my-coach-page');
+
+            const coachDashboardView = document.getElementById('coach-dashboard-view');
+            const coachAthletesPage = document.getElementById('coach-athletes-page');
+            const coachRequestsPage = document.getElementById('coach-requests-page');
+            const coachAthleteDetailsPage = document.getElementById('coach-athlete-details-page');
+
+            const athletePages = [
+                dashboardOverview,
+                profilePage,
+                exercisePage,
+                assessmentPage,
+                myCoachPage
+            ];
+
+            const coachPages = [
+                coachDashboardView,
+                coachAthletesPage,
+                coachRequestsPage,
+                coachAthleteDetailsPage
+            ];
+
+            // Hide all athlete and coach pages first.
+            [...athletePages, ...coachPages].forEach(element => {
+                if (!element) return;
+                element.classList.add('hidden');
+                element.classList.remove('active');
+                element.style.display = 'none';
+            });
+
+            // Athlete pages
+            if (page === 'dashboard' || page === 'overview') {
+                if (dashboardOverview) {
+                    dashboardOverview.classList.remove('hidden');
+                    dashboardOverview.classList.add('active');
+                    dashboardOverview.style.display = 'block';
+                }
+                return;
+            }
+
+            if (page === 'profile') {
+                if (profilePage) {
+                    profilePage.classList.remove('hidden');
+                    profilePage.classList.add('active');
+                    profilePage.style.display = 'block';
+                }
+                loadProfile();
+                return;
+            }
+
+            if (page === 'exercise') {
+                if (exercisePage) {
+                    exercisePage.classList.remove('hidden');
+                    exercisePage.classList.add('active');
+                    exercisePage.style.display = 'block';
+                }
+                loadExerciseHistory();
+                return;
+            }
+
+            if (page === 'assessment') {
+                if (assessmentPage) {
+                    assessmentPage.classList.remove('hidden');
+                    assessmentPage.classList.add('active');
+                    assessmentPage.style.display = 'block';
+                }
+                loadAssessmentHistory();
+                return;
+            }
+
+            if (page === 'my-coach') {
+                if (myCoachPage) {
+                    myCoachPage.classList.remove('hidden');
+                    myCoachPage.classList.add('active');
+                    myCoachPage.style.display = 'block';
+                }
+                displayCoachConnection();
+                loadAthleteTrainingRecommendations();
+                return;
+            }
+
+            // Coach pages
+            if (page === 'coach-dashboard-view') {
+                if (coachDashboardView) {
+                    coachDashboardView.classList.remove('hidden');
+                    coachDashboardView.classList.add('active');
+                    coachDashboardView.style.display = 'block';
+                }
+                loadCoachDashboard();
+                loadCoachHighRiskAlerts();
+                return;
+            }
+
+            if (page === 'coach-athletes') {
+                if (coachAthletesPage) {
+                    coachAthletesPage.classList.remove('hidden');
+                    coachAthletesPage.classList.add('active');
+                    coachAthletesPage.style.display = 'block';
+                }
+                loadCoachAthletes();
+                return;
+            }
+
+            if (page === 'coach-requests') {
+                if (coachRequestsPage) {
+                    coachRequestsPage.classList.remove('hidden');
+                    coachRequestsPage.classList.add('active');
+                    coachRequestsPage.style.display = 'block';
+                }
+                loadCoachRequests();
+                return;
+            }
+
+            if (page === 'coach-athlete-details') {
+                if (coachAthleteDetailsPage) {
+                    coachAthleteDetailsPage.classList.remove('hidden');
+                    coachAthleteDetailsPage.classList.add('active');
+                    coachAthleteDetailsPage.style.display = 'block';
+                }
+            }
+        }
+
+        // ---------- STABILITY PATCH: all functions below now use apiFetch ----------
+ 
+        async function loadProfile() {
+            try {
+                const response = await apiFetch('/profile');
+                if (response.ok) {
+                    const data = await response.json();
+                    const profile = data.profile;
+                    document.getElementById('profile-firstname').value = profile.first_name;
+                    document.getElementById('profile-lastname').value = profile.last_name;
+                    document.getElementById('profile-age').value = profile.age;
+                    document.getElementById('profile-height').value = profile.height;
+                    document.getElementById('profile-weight').value = profile.weight;
+                    document.getElementById('profile-sport').value = profile.sport;
+                    document.getElementById('profile-experience').value = profile.years_of_experience;
+                    document.getElementById('profile-frequency').value = profile.training_frequency;
+                    document.getElementById('profile-injury').value = profile.injury_history || '';
+                } else if (response.status !== 404) {
+                    console.error('Unexpected /profile status:', response.status);
+                }
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert('Could not load your profile. Check your connection.', 'error', 'profile-alert');
+                }
+            }
+        }
+ 
+        async function handleProfileUpdate(e) {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalLabel = submitBtn.textContent;
+ 
+            const profileData = {
+                first_name: document.getElementById('profile-firstname').value,
+                last_name: document.getElementById('profile-lastname').value,
+                age: parseInt(document.getElementById('profile-age').value),
+                height: parseFloat(document.getElementById('profile-height').value),
+                weight: parseFloat(document.getElementById('profile-weight').value),
+                sport: document.getElementById('profile-sport').value,
+                years_of_experience: parseInt(document.getElementById('profile-experience').value),
+                training_frequency: parseInt(document.getElementById('profile-frequency').value),
+                injury_history: document.getElementById('profile-injury').value || null
+            };
+ 
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Saving...';
+ 
+            try {
+                const response = await apiFetch('/profile/create', {
+                    method: 'POST',
+                    body: JSON.stringify(profileData)
+                });
+ 
+                if (response.ok) {
+                    currentUserHasProfile = true;
+                    showAlert('Profile saved successfully!', 'success', 'profile-alert');
+                    setTimeout(() => showDashboard(), 1000);
+                } else {
+                    const error = await response.json();
+                    showAlert('Error: ' + error.error, 'error', 'profile-alert');
+                }
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert('Could not save your profile. Check your connection and try again.', 'error', 'profile-alert');
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalLabel;
+            }
+        }
+ 
+        let editingExerciseId = null;
+
+        function resetExerciseForm() {
+            const form = document.querySelector('#exercise-page form');
+            const submitBtn = document.getElementById('exercise-submit-btn');
+            const cancelBtn = document.getElementById('exercise-cancel-edit-btn');
+            const exerciseDate = document.getElementById('exercise-date');
+
+            if (form) form.reset();
+            if (exerciseDate) exerciseDate.valueAsDate = new Date();
+
+            editingExerciseId = null;
+
+            if (submitBtn) {
+                submitBtn.textContent = 'Log Exercise';
+                submitBtn.disabled = false;
+            }
+
+            if (cancelBtn) {
+                cancelBtn.classList.add('hidden');
+                cancelBtn.style.display = 'none';
+            }
+        }
+
+        function cancelExerciseEdit() {
+            resetExerciseForm();
+            showAlert('Edit cancelled.', 'warning', 'exercise-alert');
+        }
+
+        async function handleExerciseLog(e) {
+            e.preventDefault();
+
+            if (!currentUserHasProfile) {
+                showAlert(
+                    'Please complete your profile before logging exercises.',
+                    'error',
+                    'exercise-alert'
+                );
+                return;
+            }
+
+            const submitBtn = document.getElementById('exercise-submit-btn');
+
+            const exerciseData = {
+                date: document.getElementById('exercise-date').value,
+                exercise_type: document.getElementById('exercise-type').value.trim(),
+                duration_minutes: parseInt(document.getElementById('exercise-duration').value, 10),
+                intensity_score: parseFloat(
+                    document.getElementById('exercise-intensity').value
+                ),
+                distance: document.getElementById('exercise-distance').value
+                    ? parseFloat(document.getElementById('exercise-distance').value)
+                    : null,
+                calories_burned: document.getElementById('exercise-calories').value
+                    ? parseInt(document.getElementById('exercise-calories').value, 10)
+                    : null,
+                notes: document.getElementById('exercise-notes').value.trim() || null
+            };
+
+            if (
+                !exerciseData.date ||
+                !exerciseData.exercise_type ||
+                Number.isNaN(exerciseData.duration_minutes) ||
+                Number.isNaN(exerciseData.intensity_score) ||
+                exerciseData.intensity_score < 1 ||
+                exerciseData.intensity_score > 10
+            ) {
+                showAlert(
+                    'Please complete the required exercise fields.',
+                    'error',
+                    'exercise-alert'
+                );
+                return;
+            }
+
+            const isEditing = editingExerciseId !== null;
+            const endpoint = isEditing
+                ? `/exercises/${editingExerciseId}`
+                : '/exercises';
+            const method = isEditing ? 'PUT' : 'POST';
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = isEditing ? 'Saving Changes...' : 'Logging...';
+            }
+
+            try {
+                const response = await apiFetch(endpoint, {
+                    method,
+                    body: JSON.stringify(exerciseData)
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    showAlert(
+                        'Error: ' + (data.error || 'Could not save exercise'),
+                        'error',
+                        'exercise-alert'
+                    );
+                    return;
+                }
+
+                showAlert(
+                    isEditing
+                        ? 'Exercise updated successfully!'
+                        : 'Exercise logged successfully!',
+                    'success',
+                    'exercise-alert'
+                );
+
+                resetExerciseForm();
+
+                await Promise.allSettled([
+                    loadExerciseHistory(),
+                    loadAthleteData()
+                ]);
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert(
+                        'Could not save the exercise. Check your connection and try again.',
+                        'error',
+                        'exercise-alert'
+                    );
+                }
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    if (editingExerciseId === null) {
+                        submitBtn.textContent = 'Log Exercise';
+                    }
+                }
+            }
+        }
+
+        async function editExercise(exerciseId) {
+            try {
+                const response = await apiFetch(`/exercises/${exerciseId}`);
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    showAlert(
+                        'Error: ' + (data.error || 'Could not load exercise'),
+                        'error',
+                        'exercise-alert'
+                    );
+                    return;
+                }
+
+                const exercise = data.exercise;
+                editingExerciseId = exercise.id;
+
+                document.getElementById('exercise-date').value = exercise.date || '';
+                document.getElementById('exercise-type').value = exercise.exercise_type || '';
+                document.getElementById('exercise-duration').value = exercise.duration_minutes ?? '';
+                const fallbackIntensityScores = {
+                    low: 2.5,
+                    moderate: 5.0,
+                    high: 7.5,
+                    very_high: 10.0
+                };
+
+                document.getElementById('exercise-intensity').value =
+                    exercise.intensity_score ??
+                    fallbackIntensityScores[exercise.intensity] ??
+                    5.0;
+                document.getElementById('exercise-distance').value = exercise.distance ?? '';
+                document.getElementById('exercise-calories').value = exercise.calories_burned ?? '';
+                document.getElementById('exercise-notes').value = exercise.notes || '';
+
+                const submitBtn = document.getElementById('exercise-submit-btn');
+                const cancelBtn = document.getElementById('exercise-cancel-edit-btn');
+
+                if (submitBtn) submitBtn.textContent = 'Save Changes';
+
+                if (cancelBtn) {
+                    cancelBtn.classList.remove('hidden');
+                    cancelBtn.style.display = 'inline-block';
+                }
+
+                showAlert(
+                    'Editing exercise. Update the fields and click Save Changes.',
+                    'warning',
+                    'exercise-alert'
+                );
+
+                document.getElementById('exercise-page').scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert(
+                        'Could not load the exercise for editing.',
+                        'error',
+                        'exercise-alert'
+                    );
+                }
+            }
+        }
+
+        async function deleteExercise(exerciseId) {
+            const confirmed = confirm(
+                'Delete this exercise record? This action cannot be undone.'
+            );
+
+            if (!confirmed) return;
+
+            try {
+                const response = await apiFetch(`/exercises/${exerciseId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    showAlert(
+                        'Error: ' + (data.error || 'Could not delete exercise'),
+                        'error',
+                        'exercise-alert'
+                    );
+                    return;
+                }
+
+                if (editingExerciseId === exerciseId) {
+                    resetExerciseForm();
+                }
+
+                showAlert(
+                    'Exercise deleted successfully!',
+                    'success',
+                    'exercise-alert'
+                );
+
+                await Promise.allSettled([
+                    loadExerciseHistory(),
+                    loadAthleteData()
+                ]);
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert(
+                        'Could not delete the exercise. Check your connection and try again.',
+                        'error',
+                        'exercise-alert'
+                    );
+                }
+            }
+        }
+
+        async function loadExerciseHistory() {
+            try {
+                const response = await apiFetch('/exercises?days=30');
+
+                if (!response.ok) {
+                    document.getElementById('exercise-list').innerHTML =
+                        '<p class="error">Could not load exercise history.</p>';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (!data.exercises.length) {
+                    document.getElementById('exercise-list').innerHTML =
+                        '<p>No exercises logged yet.</p>';
+                    return;
+                }
+
+                const html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Exercise</th>
+                                <th>Duration</th>
+                                <th>Intensity</th>
+                                <th>Distance</th>
+                                <th>Calories</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.exercises.map(ex => `
+                                <tr>
+                                    <td>${ex.date}</td>
+                                    <td>${ex.exercise_type}</td>
+                                    <td>${ex.duration_minutes} min</td>
+                                    <td>
+                                        ${
+                                            ex.intensity_score != null
+                                                ? Number(ex.intensity_score).toFixed(1) + '/10'
+                                                : ex.intensity
+                                        }
+                                    </td>
+                                    <td>${ex.distance ?? '-'}</td>
+                                    <td>${ex.calories_burned ?? '-'}</td>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            class="secondary-button"
+                                            onclick="editExercise(${ex.id})"
+                                            style="margin-right: 6px;"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onclick="deleteExercise(${ex.id})"
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+
+                document.getElementById('exercise-list').innerHTML = html;
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    document.getElementById('exercise-list').innerHTML =
+                        '<p class="error">Could not load exercise history.</p>';
+                }
+            }
+        }
+
+        // Prevent duplicate assessment requests caused by repeated clicks.
+        let assessmentRequestInProgress = false;
+
+        async function runAssessment() {
+            if (assessmentRequestInProgress) return;
+
+            if (!currentUserHasProfile) {
+                showAlert(
+                    'Please complete your profile before running an assessment.',
+                    'error',
+                    'assessment-alert'
+                );
+                return;
+            }
+
+            const genderElement = document.getElementById('assessment-gender');
+            const warmupElement = document.getElementById('assessment-warmup');
+            const sleepElement = document.getElementById('assessment-sleep');
+            const stressElement = document.getElementById('assessment-stress');
+            const flexibilityElement = document.getElementById('assessment-flexibility');
+            const asymmetryElement = document.getElementById('assessment-asymmetry');
+            const recoveryElement = document.getElementById('assessment-recovery');
+
+            if (
+                !genderElement ||
+                !warmupElement ||
+                !sleepElement ||
+                !stressElement ||
+                !flexibilityElement ||
+                !asymmetryElement ||
+                !recoveryElement
+            ) {
+                showAlert(
+                    'Assessment form could not be loaded. Please refresh the page.',
+                    'error',
+                    'assessment-alert'
+                );
+                return;
+            }
+
+            const assessmentData = {
+                gender: parseInt(genderElement.value, 10),
+                warmup_time: parseFloat(warmupElement.value),
+                sleep_hours: parseFloat(sleepElement.value),
+                stress_level: parseFloat(stressElement.value),
+                flexibility_score: parseFloat(flexibilityElement.value),
+                muscle_asymmetry: parseFloat(asymmetryElement.value),
+                recovery_time: parseFloat(recoveryElement.value)
+            };
+
+            if (
+                genderElement.value === '' ||
+                warmupElement.value === '' ||
+                sleepElement.value === '' ||
+                stressElement.value === '' ||
+                flexibilityElement.value === '' ||
+                asymmetryElement.value === '' ||
+                recoveryElement.value === ''
+            ) {
+                showAlert(
+                    'Please complete all assessment fields.',
+                    'error',
+                    'assessment-alert'
+                );
+                return;
+            }
+
+            if (Object.values(assessmentData).some(Number.isNaN)) {
+                showAlert(
+                    'Please enter valid numbers for all assessment fields.',
+                    'error',
+                    'assessment-alert'
+                );
+                return;
+            }
+
+            if (assessmentData.gender !== 0 && assessmentData.gender !== 1) {
+                showAlert('Please select a valid gender.', 'error', 'assessment-alert');
+                return;
+            }
+
+            if (assessmentData.warmup_time < 0) {
+                showAlert('Warm-up time cannot be negative.', 'error', 'assessment-alert');
+                return;
+            }
+
+            if (assessmentData.sleep_hours < 0 || assessmentData.sleep_hours > 24) {
+                showAlert('Sleep hours must be between 0 and 24.', 'error', 'assessment-alert');
+                return;
+            }
+
+            if (assessmentData.stress_level < 1 || assessmentData.stress_level > 10) {
+                showAlert('Stress level must be between 1 and 10.', 'error', 'assessment-alert');
+                return;
+            }
+
+            if (
+                assessmentData.flexibility_score < 0 ||
+                assessmentData.flexibility_score > 100
+            ) {
+                showAlert(
+                    'Flexibility score must be between 0 and 100.',
+                    'error',
+                    'assessment-alert'
+                );
+                return;
+            }
+
+            if (assessmentData.muscle_asymmetry < 0) {
+                showAlert(
+                    'Muscle asymmetry cannot be negative.',
+                    'error',
+                    'assessment-alert'
+                );
+                return;
+            }
+
+            if (assessmentData.recovery_time < 0) {
+                showAlert(
+                    'Recovery time cannot be negative.',
+                    'error',
+                    'assessment-alert'
+                );
+                return;
+            }
+
+            const loadingElement = document.getElementById('assessment-loading');
+            const assessmentButton = document.getElementById('run-assessment-btn');
+
+            assessmentRequestInProgress = true;
+
+            if (assessmentButton) {
+                assessmentButton.disabled = true;
+                assessmentButton.textContent = 'Assessing...';
+            }
+
+            if (loadingElement) {
+                loadingElement.classList.remove('hidden');
+                loadingElement.style.display = 'block';
+            }
+
+            try {
+                const response = await apiFetch('/risk/assess', {
+                    method: 'POST',
+                    body: JSON.stringify(assessmentData)
+                });
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    if (data.code === 'RECENT_EXERCISE_REQUIRED') {
+                        showAlert(
+                            data.error ||
+                            'Please log a recent exercise before running an assessment.',
+                            'warning',
+                            'assessment-alert'
+                        );
+
+                        showPage('exercise');
+                        return;
+                    }
+
+                    showAlert(
+                        'Error: ' + (data.error || 'Assessment failed'),
+                        'error',
+                        'assessment-alert'
+                    );
+                    return;
+                }
+
+                // Show the new result immediately.
+                displayAssessment(data.assessment);
+
+                // Stop the visible loading state as soon as prediction is ready.
+                if (loadingElement) {
+                    loadingElement.classList.add('hidden');
+                    loadingElement.style.display = 'none';
+                }
+
+                // Refresh the history/dashboard together instead of one after another.
+                // These do not delay showing the assessment result.
+                Promise.allSettled([
+                    loadAssessmentHistory(),
+                    loadAthleteData()
+                ]).catch(error => {
+                    console.error('Background refresh error:', error);
+                });
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert(
+                        'Could not run the assessment. Check your connection and try again.',
+                        'error',
+                        'assessment-alert'
+                    );
+                }
+            } finally {
+                assessmentRequestInProgress = false;
+
+                if (loadingElement) {
+                    loadingElement.classList.add('hidden');
+                    loadingElement.style.display = 'none';
+                }
+
+                if (assessmentButton) {
+                    assessmentButton.disabled = false;
+                    assessmentButton.textContent = 'Run Assessment Now';
+                }
+            }
+        }
+
+                function displayAssessment(assessment) {
+            const level = normalizeRiskLevel(assessment.risk_level);
+
+            const html = `
+                <div class="assessment-result">
+                    <h3>Assessment Results</h3>
+                    <span class="risk-level ${level}">${level.toUpperCase()}</span>
+                    <p><strong>Injury Risk Score:</strong> ${assessment.injury_percentage.toFixed(1)}%</p>
+                    ${assessment.overtraining_detected ? `
+                        <p style="color: var(--danger-color);"><strong>⚠️ Overtraining Detected!</strong> Score: ${assessment.overtraining_score.toFixed(1)}%</p>
+                    ` : ''}
+                    <div class="recommendations">
+                        <h4>Recommendations:</h4>
+                        <ul>
+                            ${assessment.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('assessment-result').innerHTML = html;
+        }
+ 
+        async function loadAssessmentHistory() {
+            try {
+                const response = await apiFetch('/risk/history?days=90&limit=10');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.assessments.length > 0) {
+                        const html = `
+                            <h3 style="margin-top: 40px;">Assessment History</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Risk Level</th>
+                                        <th>Risk Score</th>
+                                        <th>Overtraining</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${data.assessments.map(a => `
+                                        <tr>
+                                            <td>${new Date(a.assessment_date).toLocaleDateString()}</td>
+                                            <td><span class="risk-level ${normalizeRiskLevel(a.risk_level)}">${normalizeRiskLevel(a.risk_level)}</span></td>
+                                            <td>${a.injury_percentage.toFixed(1)}%</td>
+                                            <td>${a.overtraining_detected ? 'Yes' : 'No'}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        `;
+                        document.getElementById('assessment-history').innerHTML = html;
+                    } else {
+                        document.getElementById('assessment-history').innerHTML = '<p>No assessment history available yet.</p>';
+                    }
+                }
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    document.getElementById('assessment-history').innerHTML = '<p class="error">Could not load assessment history.</p>';
+                }
+            }
+        }
+
+        async function loadAthleteData() {
+     const results = await Promise.allSettled([
+        apiFetch('/profile'),
+        apiFetch('/risk/latest'),
+        apiFetch('/exercises/stats?days=7')
+    ]);
+
+     const [profileResult, riskResult, statsResult] = results;
+
+    // =========================
+    // PROFILE / BMI
+    // =========================
+    if (
+        profileResult.status === 'fulfilled' &&
+        profileResult.value.ok
+    ) {
+        const data = await profileResult.value.json();
+        const profile = data.profile;
+
+        const bmiElement = document.getElementById('bmi-value');
+        const bmiStatus = document.getElementById('bmi-status');
+
+        if (bmiElement && typeof profile.bmi === 'number') {
+            bmiElement.textContent = profile.bmi.toFixed(1);
+        }
+
+        if (bmiStatus && typeof profile.bmi === 'number') {
+            let status = 'Normal Weight';
+
+            if (profile.bmi < 18.5) {
+                status = 'Underweight';
+            } else if (profile.bmi >= 25 && profile.bmi < 30) {
+                status = 'Overweight';
+            } else if (profile.bmi >= 30) {
+                status = 'Obese';
+            }
+
+            bmiStatus.textContent = status;
+        }
+    }
+
+    // =========================
+    // LATEST RISK ASSESSMENT
+    // =========================
+    const latestRisk =
+        document.getElementById('latest-risk');
+
+    const statusEmoji =
+        document.getElementById('status-emoji');
+
+    const statusText =
+        document.getElementById('status-text');
+
+    if (
+        riskResult.status === 'fulfilled' &&
+        riskResult.value.ok
+    ) {
+        const data = await riskResult.value.json();
+        const assessment = data.assessment;
+
+        if (assessment) {
+            const percentage =
+                Number(assessment.injury_percentage || 0);
+
+            const riskLevel =
+                normalizeRiskLevel(assessment.risk_level || 'low');
+
+            if (latestRisk) {
+                latestRisk.textContent =
+                    percentage.toFixed(1) + '%';
+            }
+
+            let emoji = '✅';
+
+            if (riskLevel === 'medium') {
+                emoji = '⚠️';
+            } else if (riskLevel === 'high') {
+                emoji = '🔴';
+            }
+
+            if (statusEmoji) {
+                statusEmoji.textContent = emoji;
+            }
+
+            if (statusText) {
+                statusText.textContent =
+                    'Risk: ' + riskLevel.toUpperCase();
+            }
+
+            setRiskCardColor(
+                'overall-status-card',
+                riskLevel
+            );
+        }
+    } else {
+        // IMPORTANT:
+        // If there is no assessment, BOTH cards say not assessed.
+
+        if (latestRisk) {
+            latestRisk.textContent = 'Not assessed';
+        }
+
+        if (statusEmoji) {
+            statusEmoji.textContent = '➖';
+        }
+
+        if (statusText) {
+            statusText.textContent = 'Not assessed';
+        }
+
+        setRiskCardColor(
+            'overall-status-card',
+            null
+        );
+    }
+
+    // =========================
+    // WEEKLY EXERCISE COUNT
+    // =========================
+    if (
+        statsResult.status === 'fulfilled' &&
+        statsResult.value.ok
+    ) {
+        const data = await statsResult.value.json();
+
+        const weeklyExercises =
+            document.getElementById('weekly-exercises');
+
+        if (weeklyExercises) {
+            weeklyExercises.textContent =
+                data.stats?.total_sessions || 0;
+        }
+    }
+}
+        async function loadCoachDashboard() {
+            try {
+                const response = await apiFetch('/coach/dashboard');
+                if (response.ok) {
+                    const data = await response.json();
+                    const dashboard = data.dashboard;
+                    document.getElementById('coach-total-athletes').textContent = dashboard.total_athletes;
+                    const pendingElement = document.getElementById('coach-pending-requests');
+                    if (pendingElement) pendingElement.textContent = dashboard.pending_requests || 0;
+                    document.getElementById('coach-high-risk').textContent = dashboard.high_risk_athletes;
+                    document.getElementById('coach-overtraining').textContent = dashboard.athletes_with_overtraining;
+ 
+                    document.getElementById('coach-high-risk-card').classList.toggle('warning', dashboard.high_risk_athletes > 0);
+                    document.getElementById('coach-overtraining-card').classList.toggle('warning', dashboard.athletes_with_overtraining > 0);
+                }
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert('Could not load dashboard stats.', 'error', 'coach-alert');
+                }
+            }
+        }
+ 
+        async function loadCoachRequests() {
+            const container = document.getElementById('coach-requests-container');
+            if (!container) return;
+
+            container.innerHTML = '<p>Loading requests&hellip;</p>';
+
+            try {
+                const response = await apiFetch('/coach/requests');
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    container.innerHTML = `<p class="error">${escapeHtml(data.error || 'Could not load requests.')}</p>`;
+                    return;
+                }
+
+                const requests = data.requests || [];
+                if (requests.length === 0) {
+                    container.innerHTML = '<p>No pending athlete requests.</p>';
+                    return;
+                }
+
+                container.innerHTML = requests.map(item => {
+                    const athlete = item.athlete || {};
+                    const profile = athlete.profile || {};
+                    const name = profile.first_name
+                        ? `${profile.first_name} ${profile.last_name || ''}`.trim()
+                        : (athlete.username || 'Athlete');
+                    const sport = profile.sport || 'Not specified';
+                    const date = item.requested_at
+                        ? new Date(item.requested_at).toLocaleDateString()
+                        : 'Not available';
+
+                    return `
+                        <div class="detail-card" style="margin-bottom:16px;">
+                            <h4>${escapeHtml(name)}</h4>
+                            <p><strong>Email:</strong> ${escapeHtml(athlete.email || 'Not available')}</p>
+                            <p><strong>Sport:</strong> ${escapeHtml(sport)}</p>
+                            <p><strong>Requested:</strong> ${date}</p>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                                <button type="button" onclick="respondToCoachRequest(${item.connection_id}, 'accept')">Accept</button>
+                                <button type="button" class="secondary-button" onclick="respondToCoachRequest(${item.connection_id}, 'reject')">Reject</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    container.innerHTML = '<p class="error">Could not load pending requests.</p>';
+                }
+            }
+        }
+
+        async function respondToCoachRequest(connectionId, action) {
+            const verb = action === 'accept' ? 'accept' : 'reject';
+            const confirmation = action === 'accept'
+                ? 'Accept this athlete request?'
+                : 'Reject this athlete request?';
+
+            if (!confirm(confirmation)) return;
+
+            try {
+                const response = await apiFetch(`/coach/requests/${connectionId}/${verb}`, {
+                    method: 'PATCH'
+                });
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    showAlert(data.error || 'Could not update request.', 'error', 'coach-requests-alert');
+                    return;
+                }
+
+                showAlert(data.message || 'Request updated successfully.', 'success', 'coach-requests-alert');
+                await loadCoachRequests();
+                await loadCoachDashboard();
+                if (action === 'accept') await loadCoachAthletes();
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert('Could not update the request.', 'error', 'coach-requests-alert');
+                }
+            }
+        }
+
+        async function loadCoachHighRiskAlerts() {
+            const container = document.getElementById('coach-high-risk-alerts');
+
+            if (!container) return;
+
+            try {
+                const response = await apiFetch('/coach/alerts?status=new');
+
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}));
+                    container.innerHTML =
+                        `<p class="error">${data.error || 'Could not load alerts.'}</p>`;
+                    return;
+                }
+
+                const data = await response.json();
+                const alerts = data.alerts || [];
+
+                if (!alerts.length) {
+                    container.innerHTML =
+                        '<p>No new High-Risk alerts.</p>';
+                    return;
+                }
+
+                container.innerHTML = alerts.map(alert => {
+                    const athlete = alert.athlete || {};
+                    const assessment = alert.assessment || {};
+                    const athleteName =
+                        athlete.username || `Athlete ${alert.athlete_id}`;
+
+                    const percentage =
+                        Number(assessment.injury_percentage || 0).toFixed(1);
+
+                    const createdAt = alert.created_at
+                        ? new Date(alert.created_at).toLocaleString()
+                        : '--';
+
+                    return `
+                        <div class="detail-card" style="margin-bottom: 14px;">
+                            <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+                                <div>
+                                    <h4 style="margin-bottom:8px;">
+                                        🔴 New High-Risk Alert
+                                    </h4>
+
+                                    <p>
+                                        <strong>Athlete:</strong>
+                                        ${escapeHtml(athleteName)}
+                                    </p>
+
+                                    <p>
+                                        <strong>Risk:</strong>
+                                        <span class="risk-level high">HIGH</span>
+                                        ${percentage}%
+                                    </p>
+
+                                    <p>
+                                        ${escapeHtml(
+                                            alert.message ||
+                                            'Review this athlete’s recent training and recovery plan.'
+                                        )}
+                                    </p>
+
+                                    <p style="opacity:0.8; font-size:0.9em;">
+                                        Created: ${createdAt}
+                                    </p>
+                                </div>
+
+                                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                    <button
+                                        type="button"
+                                        class="secondary-button"
+                                        onclick="reviewAlertAthlete(${alert.id}, ${alert.athlete_id})"
+                                    >
+                                        Review Athlete
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onclick="markHighRiskAlertReviewed(${alert.id})"
+                                    >
+                                        Mark Reviewed
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    container.innerHTML =
+                        '<p class="error">Could not load High-Risk alerts.</p>';
+                }
+            }
+        }
+
+        async function markHighRiskAlertReviewed(alertId) {
+            try {
+                const response = await apiFetch(
+                    `/coach/alerts/${alertId}/review`,
+                    {
+                        method: 'PATCH'
+                    }
+                );
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    showAlert(
+                        'Error: ' + (data.error || 'Could not review alert'),
+                        'error',
+                        'coach-alert'
+                    );
+                    return;
+                }
+
+                showAlert(
+                    'High-Risk alert marked as reviewed.',
+                    'success',
+                    'coach-alert'
+                );
+
+                await Promise.allSettled([
+                    loadCoachHighRiskAlerts(),
+                    loadCoachDashboard(),
+                    loadCoachAthletes()
+                ]);
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert(
+                        'Could not update the alert. Check your connection.',
+                        'error',
+                        'coach-alert'
+                    );
+                }
+            }
+        }
+
+        async function reviewAlertAthlete(alertId, athleteId) {
+            await viewAthleteDetails(athleteId);
+
+            try {
+                const response = await apiFetch(
+                    `/coach/alerts/${alertId}/review`,
+                    {
+                        method: 'PATCH'
+                    }
+                );
+
+                if (response.ok) {
+                    loadCoachHighRiskAlerts();
+                }
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    console.error(
+                        'Could not mark alert reviewed after opening athlete:',
+                        error
+                    );
+                }
+            }
+        }
+
+        async function sendTrainingRecommendation(athleteId) {
+            const typeElement =
+                document.getElementById('coach-recommendation-type');
+
+            const messageElement =
+                document.getElementById('coach-recommendation-message');
+
+            if (!typeElement || !messageElement) return;
+
+            const message = messageElement.value.trim();
+
+            if (!message) {
+                showAlert(
+                    'Please enter a recommendation message.',
+                    'warning',
+                    'coach-alert'
+                );
+                return;
+            }
+
+            try {
+                const response = await apiFetch(
+                    `/coach/athlete/${athleteId}/recommendations`,
+                    {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            recommendation_type: typeElement.value,
+                            message: message
+                        })
+                    }
+                );
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    showAlert(
+                        'Error: ' + (
+                            data.error ||
+                            'Could not send recommendation'
+                        ),
+                        'error',
+                        'coach-alert'
+                    );
+                    return;
+                }
+
+                messageElement.value = '';
+
+                showAlert(
+                    'Training recommendation sent to athlete.',
+                    'success',
+                    'coach-alert'
+                );
+
+                loadCoachRecommendationHistory(athleteId);
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert(
+                        'Could not send recommendation.',
+                        'error',
+                        'coach-alert'
+                    );
+                }
+            }
+        }
+
+        async function loadCoachRecommendationHistory(athleteId) {
+            const container =
+                document.getElementById('coach-recommendation-history');
+
+            if (!container) return;
+
+            try {
+                const response = await apiFetch(
+                    `/coach/athlete/${athleteId}/recommendations`
+                );
+
+                if (!response.ok) {
+                    container.innerHTML =
+                        '<p>Could not load recommendations.</p>';
+                    return;
+                }
+
+                const data = await response.json();
+                const recommendations =
+                    data.recommendations || [];
+
+                if (!recommendations.length) {
+                    container.innerHTML =
+                        '<p>No coach recommendations sent yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <h5>Sent Recommendations</h5>
+
+                    ${recommendations.map(item => `
+                        <div class="detail-card" style="margin-top:10px;">
+                            <p>
+                                <strong>
+                                    ${formatRecommendationType(
+                                        item.recommendation_type
+                                    )}
+                                </strong>
+                            </p>
+
+                            <p>${escapeHtml(item.message)}</p>
+
+                            <p style="opacity:0.75;font-size:0.9em;">
+                                ${new Date(
+                                    item.created_at
+                                ).toLocaleString()}
+                            </p>
+
+                            <button
+                                type="button"
+                                class="secondary-button"
+                                onclick="deleteTrainingRecommendation(
+                                    ${item.id},
+                                    ${athleteId}
+                                )"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    `).join('')}
+                `;
+
+            } catch (error) {
+                container.innerHTML =
+                    '<p>Could not load recommendations.</p>';
+            }
+        }
+
+        function formatRecommendationType(type) {
+            const labels = {
+                reduce_intensity: 'Reduce Training Intensity',
+                increase_recovery: 'Increase Recovery',
+                rest_day: 'Add a Rest Day',
+                custom: 'Custom Recommendation'
+            };
+
+            return labels[type] || 'Training Recommendation';
+        }
+
+        async function deleteTrainingRecommendation(
+            recommendationId,
+            athleteId
+        ) {
+            if (!confirm('Delete this recommendation?')) {
+                return;
+            }
+
+            try {
+                const response = await apiFetch(
+                    `/coach/recommendations/${recommendationId}`,
+                    {
+                        method: 'DELETE'
+                    }
+                );
+
+                if (response.ok) {
+                    loadCoachRecommendationHistory(athleteId);
+
+                    showAlert(
+                        'Recommendation deleted.',
+                        'success',
+                        'coach-alert'
+                    );
+                }
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert(
+                        'Could not delete recommendation.',
+                        'error',
+                        'coach-alert'
+                    );
+                }
+            }
+        }
+
+        async function loadAthleteTrainingRecommendations() {
+            const container =
+                document.getElementById(
+                    'athlete-training-recommendations'
+                );
+
+            if (!container) return;
+
+            if (
+                !currentCoachConnection ||
+                !currentCoachConnection.coach
+            ) {
+                container.innerHTML =
+                    '<p>Connect to a coach to receive training recommendations.</p>';
+                return;
+            }
+
+            try {
+                const response = await apiFetch(
+                    '/profile/coach-recommendations'
+                );
+
+                if (!response.ok) {
+                    container.innerHTML =
+                        '<p>No coach recommendations available.</p>';
+                    return;
+                }
+
+                const data = await response.json();
+                const recommendations =
+                    data.recommendations || [];
+
+                if (!recommendations.length) {
+                    container.innerHTML =
+                        '<p>No training recommendations from your coach yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = recommendations.map(item => `
+                    <div class="detail-card" style="margin-bottom:12px;">
+                        <h4>
+                            ${formatRecommendationType(
+                                item.recommendation_type
+                            )}
+                        </h4>
+
+                        <p>${escapeHtml(item.message)}</p>
+
+                        <p style="opacity:0.75;font-size:0.9em;">
+                            From Coach
+                            ${escapeHtml(
+                                item.coach?.username || ''
+                            )}
+                            ·
+                            ${new Date(
+                                item.created_at
+                            ).toLocaleString()}
+                        </p>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    container.innerHTML =
+                        '<p>Could not load coach recommendations.</p>';
+                }
+            }
+        }
+
+        async function loadCoachAthletes() {
+            const container = document.getElementById('athletes-table-container');
+            container.innerHTML = '<p>Loading athletes&hellip;</p>';
+
+            try {
+                const response = await apiFetch('/coach/athletes');
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    container.innerHTML =
+                        `<p class="error">Error loading athletes: ${err.error || response.status}</p>`;
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (!data.athletes || data.athletes.length === 0) {
+                    container.innerHTML = '<p>No athletes assigned yet.</p>';
+                    return;
+                }
+
+                const riskRank = {
+                    high: 0,
+                    medium: 1,
+                    low: 2,
+                    'not assessed': 3
+                };
+
+                const athletes = [...data.athletes].sort((a, b) => {
+                    const aRaw = a.latest_assessment?.risk_level || 'Not assessed';
+                    const bRaw = b.latest_assessment?.risk_level || 'Not assessed';
+
+                    const aLevel = aRaw === 'Not assessed'
+                        ? 'not assessed'
+                        : normalizeRiskLevel(aRaw);
+
+                    const bLevel = bRaw === 'Not assessed'
+                        ? 'not assessed'
+                        : normalizeRiskLevel(bRaw);
+
+                    const rankDifference =
+                        (riskRank[aLevel] ?? 4) - (riskRank[bLevel] ?? 4);
+
+                    if (rankDifference !== 0) {
+                        return rankDifference;
+                    }
+
+                    const aScore =
+                        Number(a.latest_assessment?.injury_percentage || 0);
+
+                    const bScore =
+                        Number(b.latest_assessment?.injury_percentage || 0);
+
+                    return bScore - aScore;
+                });
+
+                const summary = {
+                    high: 0,
+                    medium: 0,
+                    low: 0,
+                    notAssessed: 0
+                };
+
+                athletes.forEach(athlete => {
+                    const rawLevel =
+                        athlete.latest_assessment?.risk_level || 'Not assessed';
+
+                    if (rawLevel === 'Not assessed') {
+                        summary.notAssessed += 1;
+                        return;
+                    }
+
+                    const level = normalizeRiskLevel(rawLevel);
+
+                    if (level === 'high') summary.high += 1;
+                    else if (level === 'medium') summary.medium += 1;
+                    else if (level === 'low') summary.low += 1;
+                });
+
+                const rows = athletes.map(athlete => {
+                    const name = athlete.profile?.first_name
+                        ? `${athlete.profile.first_name} ${athlete.profile.last_name || ''}`.trim()
+                        : athlete.username;
+
+                    const sport = athlete.profile?.sport || '--';
+
+                    const rawRiskLevel =
+                        athlete.latest_assessment?.risk_level || 'Not assessed';
+
+                    const riskLevel = rawRiskLevel === 'Not assessed'
+                        ? 'not assessed'
+                        : normalizeRiskLevel(rawRiskLevel);
+
+                    const riskScore =
+                        typeof athlete.latest_assessment?.injury_percentage === 'number'
+                            ? athlete.latest_assessment.injury_percentage.toFixed(1) + '%'
+                            : '--';
+
+                    let statusLabel = 'Not Assessed';
+                    let riskBadge = '<span>Not assessed</span>';
+
+                    if (riskLevel === 'high') {
+                        statusLabel = 'Needs Attention';
+                        riskBadge = '<span class="risk-level high">HIGH</span>';
+                    } else if (riskLevel === 'medium') {
+                        statusLabel = 'Monitor Closely';
+                        riskBadge = '<span class="risk-level medium">MEDIUM</span>';
+                    } else if (riskLevel === 'low') {
+                        statusLabel = 'Stable';
+                        riskBadge = '<span class="risk-level low">LOW</span>';
+                    }
+
+                    return `
+                        <tr data-risk="${riskLevel}">
+                            <td>${escapeHtml(name)}</td>
+                            <td>${escapeHtml(sport)}</td>
+                            <td>${riskBadge}</td>
+                            <td>${riskScore}</td>
+                            <td><strong>${statusLabel}</strong></td>
+                            <td>
+                                <button
+                                    type="button"
+                                    class="secondary-button"
+                                    onclick="viewAthleteDetails(${athlete.user_id})"
+                                >
+                                    View Details
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                const highAlert = summary.high > 0
+                    ? `
+                        <div class="alert error" style="margin-bottom: 16px;">
+                            <strong>${summary.high} high-risk athlete${summary.high === 1 ? '' : 's'} require attention.</strong>
+                            High-risk athletes are shown first in the table.
+                        </div>
+                    `
+                    : `
+                        <div class="alert success" style="margin-bottom: 16px;">
+                            No athletes are currently classified as High Risk.
+                        </div>
+                    `;
+
+                container.innerHTML = `
+                    ${highAlert}
+
+                    <div class="dashboard" style="margin-bottom: 18px;">
+                        <div class="card">
+                            <h3>High Risk</h3>
+                            <div class="card-value">${summary.high}</div>
+                            <div class="card-label">Needs Attention</div>
+                        </div>
+
+                        <div class="card">
+                            <h3>Medium Risk</h3>
+                            <div class="card-value">${summary.medium}</div>
+                            <div class="card-label">Monitor Closely</div>
+                        </div>
+
+                        <div class="card">
+                            <h3>Low Risk</h3>
+                            <div class="card-value">${summary.low}</div>
+                            <div class="card-label">Stable</div>
+                        </div>
+
+                        <div class="card">
+                            <h3>Not Assessed</h3>
+                            <div class="card-value">${summary.notAssessed}</div>
+                            <div class="card-label">Assessment Needed</div>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Sport</th>
+                                <th>Risk Level</th>
+                                <th>Risk Score</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                `;
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    container.innerHTML =
+                        '<p class="error">Could not load athletes. Check your connection.</p>';
+                }
+            }
+        }
+
+        async function viewAthleteDetails(athleteId) {
+            try {
+                const response = await apiFetch(`/coach/athlete/${athleteId}`);
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    showAlert(
+                        `Unable to load athlete details: ${err.error || response.status}`,
+                        'error',
+                        'coach-alert'
+                    );
+                    return;
+                }
+
+                const data = await response.json();
+                const athlete = data.athlete;
+                const profile = athlete.profile || {};
+                const assessments = athlete.assessments || [];
+                const exercises = athlete.recent_exercises || [];
+                const latestAssessment = athlete.latest_assessment || null;
+
+                const stats =
+                    athlete.statistics?.last_7_days || {
+                        total_sessions: 0,
+                        total_duration_minutes: 0,
+                        total_distance_km: 0,
+                        average_intensity: 0
+                    };
+
+                let latestRiskHtml = '<p>No assessment available yet.</p>';
+
+                if (latestAssessment) {
+                    const latestLevel =
+                        normalizeRiskLevel(latestAssessment.risk_level);
+
+                    const recommendations =
+                        Array.isArray(latestAssessment.recommendations)
+                            ? latestAssessment.recommendations
+                            : String(latestAssessment.recommendations || '')
+                                .split('\n')
+                                .map(item => item.trim())
+                                .filter(Boolean);
+
+                    latestRiskHtml = `
+                        <p>
+                            <strong>Risk Level:</strong>
+                            <span class="risk-level ${latestLevel}">
+                                ${latestLevel.toUpperCase()}
+                            </span>
+                        </p>
+
+                        <p>
+                            <strong>ML Injury Probability:</strong>
+                            ${Number(latestAssessment.injury_percentage || 0).toFixed(1)}%
+                        </p>
+
+                        <p>
+                            <strong>Overtraining:</strong>
+                            ${latestAssessment.overtraining_detected ? 'Yes' : 'No'}
+                        </p>
+
+                        <h5>Recommendations</h5>
+
+                        ${
+                            recommendations.length
+                                ? `
+                                    <ul>
+                                        ${recommendations.map(item => `
+                                            <li>${escapeHtml(item)}</li>
+                                        `).join('')}
+                                    </ul>
+                                `
+                                : '<p>No recommendations available.</p>'
+                        }
+                    `;
+                }
+
+                const assessmentsHtml = assessments.length
+                    ? `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Risk</th>
+                                    <th>Score</th>
+                                    <th>Overtraining</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${assessments.map(a => `
+                                    <tr>
+                                        <td>${new Date(a.assessment_date).toLocaleDateString()}</td>
+                                        <td>${normalizeRiskLevel(a.risk_level)}</td>
+                                        <td>${Number(a.injury_percentage || 0).toFixed(1)}%</td>
+                                        <td>${a.overtraining_detected ? 'Yes' : 'No'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `
+                    : '<p>No assessments available yet.</p>';
+
+                const exercisesHtml = exercises.length
+                    ? `
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Exercise</th>
+                                    <th>Duration</th>
+                                    <th>Intensity</th>
+                                    <th>Distance</th>
+                                    <th>Calories</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${exercises.map(ex => `
+                                    <tr>
+                                        <td>${escapeHtml(ex.date || '--')}</td>
+                                        <td>${escapeHtml(ex.exercise_type || '--')}</td>
+                                        <td>${Number(ex.duration_minutes || 0)} min</td>
+                                        <td>${escapeHtml(ex.intensity || '--')}</td>
+                                        <td>${ex.distance ?? '-'}</td>
+                                        <td>${ex.calories_burned ?? '-'}</td>
+                                        <td>
+                                            <button
+                                                type="button"
+                                                onclick="coachDeleteExercise(${athlete.user_id}, ${ex.id})"
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    `
+                    : '<p>No exercise records in the last 7 days.</p>';
+
+                document.getElementById('coach-athlete-details').innerHTML = `
+                    <div class="detail-card">
+                        <h4>
+                            ${escapeHtml(profile.first_name || athlete.username)}
+                            ${escapeHtml(profile.last_name || '')}
+                        </h4>
+
+                        <p><strong>Sport:</strong> ${escapeHtml(profile.sport || '--')}</p>
+                        <p><strong>Age:</strong> ${profile.age || '--'}</p>
+                        <p><strong>Height:</strong> ${profile.height ? profile.height + ' cm' : '--'}</p>
+                        <p><strong>Weight:</strong> ${profile.weight ? profile.weight + ' kg' : '--'}</p>
+                        <p><strong>BMI:</strong> ${
+                            typeof profile.bmi === 'number'
+                                ? profile.bmi.toFixed(1)
+                                : '--'
+                        }</p>
+                        <p>
+                            <strong>Training Frequency:</strong>
+                            ${profile.training_frequency ?? '--'} times/week
+                        </p>
+                        <p>
+                            <strong>Injury History:</strong>
+                            ${escapeHtml(profile.injury_history || 'None reported')}
+                        </p>
+                    </div>
+
+                    <div class="detail-card">
+                        <h4>Latest Injury Risk</h4>
+                        ${latestRiskHtml}
+                    </div>
+
+                    <div class="detail-card">
+                        <h4>Last 7 Days Training</h4>
+                        <p><strong>Total Sessions:</strong> ${stats.total_sessions}</p>
+                        <p><strong>Total Minutes:</strong> ${stats.total_duration_minutes}</p>
+                        <p><strong>Total Distance:</strong> ${stats.total_distance_km || 0} km</p>
+                        <p><strong>Average Intensity:</strong> ${stats.average_intensity}</p>
+                    </div>
+
+                    <div class="detail-card">
+                        <h4>Exercise History — Last 7 Days</h4>
+                        <p style="margin-bottom: 12px;">
+                            Coaches may remove an incorrect exercise record,
+                            but cannot edit athlete-entered values.
+                        </p>
+                        ${exercisesHtml}
+                    </div>
+
+                    <div class="detail-card">
+                        <h4>Training Plan Recommendation</h4>
+
+                        <p>
+                            Send a training adjustment for this athlete.
+                            The athlete will see it in the My Coach page.
+                        </p>
+
+                        <div class="form-group">
+                            <label for="coach-recommendation-type">
+                                Recommendation Type
+                            </label>
+
+                            <select id="coach-recommendation-type">
+                                <option value="reduce_intensity">
+                                    Reduce Training Intensity
+                                </option>
+                                <option value="increase_recovery">
+                                    Increase Recovery
+                                </option>
+                                <option value="rest_day">
+                                    Add a Rest Day
+                                </option>
+                                <option value="custom">
+                                    Custom Recommendation
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="coach-recommendation-message">
+                                Message
+                            </label>
+
+                            <textarea
+                                id="coach-recommendation-message"
+                                rows="3"
+                                maxlength="1000"
+                                placeholder="Example: Reduce high-intensity training for the next few sessions and focus on recovery."
+                            ></textarea>
+                        </div>
+
+                        <button
+                            type="button"
+                            onclick="sendTrainingRecommendation(${athlete.user_id})"
+                        >
+                            Send Recommendation
+                        </button>
+
+                        <div
+                            id="coach-recommendation-history"
+                            style="margin-top: 18px;"
+                        ></div>
+                    </div>
+
+                    <div class="detail-card">
+                        <h4>Recent Assessments</h4>
+                        ${assessmentsHtml}
+                    </div>
+                `;
+
+                showPage('coach-athlete-details');
+
+                loadCoachRecommendationHistory(
+                    athlete.user_id
+                );
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert(
+                        'Could not load athlete details. Check your connection.',
+                        'error',
+                        'coach-alert'
+                    );
+                }
+            }
+        }
+
+        async function coachDeleteExercise(athleteId, exerciseId) {
+            const confirmed = confirm(
+                'Delete this athlete exercise record? This action cannot be undone.'
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                const response = await apiFetch(
+                    `/coach/athlete/${athleteId}/exercise/${exerciseId}`,
+                    {
+                        method: 'DELETE'
+                    }
+                );
+
+                const data = await response.json().catch(() => ({}));
+
+                if (!response.ok) {
+                    showAlert(
+                        'Error: ' + (data.error || 'Could not delete exercise'),
+                        'error',
+                        'coach-alert'
+                    );
+                    return;
+                }
+
+                showAlert(
+                    'Exercise deleted successfully.',
+                    'success',
+                    'coach-alert'
+                );
+
+                await Promise.allSettled([
+                    viewAthleteDetails(athleteId),
+                    loadCoachDashboard(),
+                    loadCoachAthletes()
+                ]);
+
+            } catch (error) {
+                if (error.message !== 'SESSION_EXPIRED') {
+                    showAlert(
+                        'Could not delete the exercise. Check your connection and try again.',
+                        'error',
+                        'coach-alert'
+                    );
+                }
+            }
+        }
+
+         function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+}
+
+function displayCoachConnection() {
+    const container = document.getElementById(
+        'coach-connection-content'
+    );
+
+    if (!container) {
+        return;
+    }
+
+    if (!currentCoachConnection) {
+        container.innerHTML = `
+            <div class="detail-card">
+                <h4>No Coach Connected</h4>
+                <p>You are not currently connected to a coach.</p>
+                <p>
+                    You can request a coach by entering the coach's
+                    email during registration.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    const status = currentCoachConnection.status || 'pending';
+    const coach = currentCoachConnection.coach || {};
+
+    let statusText = 'Pending Approval';
+    let statusClass = 'warning';
+    let statusIcon = '🟡';
+
+    if (status === 'accepted') {
+        statusText = 'Connected';
+        statusClass = 'success';
+        statusIcon = '🟢';
+    } else if (status === 'rejected') {
+        statusText = 'Rejected';
+        statusClass = 'danger';
+        statusIcon = '🔴';
+    }
+
+    const requestDate = currentCoachConnection.assigned_date
+        ? new Date(
+            currentCoachConnection.assigned_date
+        ).toLocaleDateString()
+        : 'Not available';
+
+    container.innerHTML = `
+        <div class="detail-card">
+            <h4>${statusIcon} Coach Connection</h4>
+
+            <p>
+                <strong>Coach:</strong>
+                ${escapeHtml(coach.username || 'Coach')}
+            </p>
+
+            <p>
+                <strong>Email:</strong>
+                ${escapeHtml(coach.email || 'Not available')}
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+                <span class="risk-level ${statusClass}">
+                    ${statusText}
+                </span>
+            </p>
+
+            <p>
+                <strong>Request Date:</strong>
+                ${requestDate}
+            </p>
+        </div>
+    `;
+}
+ 
+         
+            function logout()
+            {
+            stopDashboardAutoRefresh();
+            localStorage.removeItem('auth_token');
+            authToken = null;
+            currentUser = null;
+            currentUserRole = null;
+            currentUserHasProfile = false;
+            currentCoachConnection = null;
+            const dashboardWrapper = document.getElementById('dashboard-wrapper');
+            const authPage = document.getElementById('auth-page');
+            if (dashboardWrapper) {
+                dashboardWrapper.classList.add('hidden');
+            }
+            if (authPage) {
+                authPage.classList.remove('hidden');
+                authPage.classList.add('active');
+            }
+            location.reload();
+        }
+    </script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <script src="/static/js/ui.js"></script>
+</body>
+</html>

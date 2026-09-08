@@ -1,0 +1,1666 @@
+/* Sport-themed stylesheet for the dashboard
+   Modern athletic design with compact dashboard charts */
+
+:root {
+  --bg-1: #0f1724;
+  --accent: #ff7a18;
+  --accent-2: #00c2a8;
+  --muted: #98a0a6;
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --glass: rgba(255, 255, 255, 0.04);
+  --surface: #ffffff;
+  --panel-border: rgba(148, 163, 184, 0.14);
+  --panel-shadow: 0 10px 30px rgba(2, 6, 23, 0.42);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  background:
+    radial-gradient(
+      circle at 12% 18%,
+      rgba(255, 122, 24, 0.14),
+      transparent 26%
+    ),
+    radial-gradient(
+      circle at 88% 72%,
+      rgba(0, 194, 168, 0.12),
+      transparent 28%
+    ),
+    linear-gradient(
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.018) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      180deg,
+      #08111f 0%,
+      #0b1524 52%,
+      #0f1724 100%
+    );
+
+  background-size:
+    auto,
+    auto,
+    44px 44px,
+    44px 44px,
+    auto;
+
+  background-attachment: fixed;
+
+  color: #e6eef6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 20px;
+}
+
+header {
+  margin-bottom: 18px;
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(8, 18, 35, 0.45),
+    rgba(20, 30, 45, 0.25)
+  );
+  backdrop-filter: blur(8px);
+}
+
+.hero .title {
+  color: #ffffff;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.hero p {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), #ffb57a);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  color: #102024;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.logo-mark {
+  width: 76px;
+  height: 76px;
+  padding: 6px;
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 122, 24, 0.16),
+    rgba(0, 194, 168, 0.16)
+  );
+  box-shadow: 0 12px 32px rgba(2, 6, 23, 0.35);
+}
+
+/* Top navigation */
+.nav-links,
+.nav-links > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.nav-links a,
+.nav-links .nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: #dce7f2;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.nav-links a:hover,
+.nav-links .nav-btn:hover {
+  border-bottom-color: var(--accent);
+  color: #ffffff;
+}
+
+/* Dashboard summary cards */
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.card {
+  min-height: 126px;
+  padding: 18px;
+  border: 1px solid var(--panel-border);
+  border-left: 5px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(19, 33, 53, 0.94),
+    rgba(13, 24, 40, 0.94)
+  );
+  box-shadow: var(--panel-shadow);
+  color: var(--muted);
+}
+
+.card h3 {
+  margin-bottom: 8px;
+  color: #eaf5ff;
+  font-size: 1rem;
+}
+
+.card .card-value {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-size: 2.2rem;
+  font-weight: 800;
+}
+
+.card .card-label {
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.card.success {
+  border-left-color: #00c176;
+}
+
+.card.warning {
+  border-left-color: #ffb74d;
+}
+
+.card.danger {
+  border-left-color: #ff6b6b;
+}
+
+.profile-section {
+  padding: 20px;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02),
+    rgba(255, 255, 255, 0.01)
+  );
+  box-shadow: 0 6px 20px rgba(2, 6, 23, 0.5);
+  color: var(--muted);
+}
+
+.profile-section h3 {
+  padding-bottom: 10px;
+  border-bottom: 2px dashed rgba(255, 255, 255, 0.03);
+  color: #ffffff;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  color: #ffffff;
+}
+
+button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #071219;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button.secondary-button {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  color: #ffffff;
+}
+
+button:hover {
+  filter: brightness(1.05);
+}
+
+/* Landing page */
+.landing-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 24px;
+  align-items: start;
+  margin-top: 24px;
+}
+
+.landing-copy {
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: linear-gradient(
+    135deg,
+    rgba(8, 18, 35, 0.45),
+    rgba(20, 30, 45, 0.25)
+  );
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.4);
+  backdrop-filter: blur(8px);
+}
+
+.landing-copy h2 {
+  margin-bottom: 10px;
+  color: #ffffff;
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.landing-copy p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 122, 24, 0.16);
+  color: #ffb57a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.feature-card {
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.feature-title {
+  margin-bottom: 6px;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.auth-panel-card {
+  padding: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.02)
+  );
+  box-shadow: 0 16px 40px rgba(2, 6, 23, 0.35);
+}
+
+.auth-switch {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tab-button {
+  flex: 1;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.tab-button.active {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: #071219;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.tab-content.hidden {
+  display: none !important;
+}
+
+.auth-helper {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.auth-helper a {
+  color: #ffb57a;
+  text-decoration: none;
+}
+
+.feature-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 8px 0 20px;
+}
+
+.feature-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.feature-pill strong {
+  display: block;
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.feature-pill span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #071219;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+/* Alerts */
+.alert {
+  margin-bottom: 14px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.alert.success {
+  border-left: 4px solid #00d384;
+  background: rgba(0, 194, 118, 0.12);
+  color: #00d384;
+}
+
+.alert.error {
+  border-left: 4px solid #ff6b6b;
+  background: rgba(255, 107, 107, 0.08);
+  color: #ff6b6b;
+}
+
+.alert.info {
+  border-left: 4px solid #0fb1a9;
+  background: rgba(16, 146, 166, 0.06);
+  color: #aee7e0;
+}
+
+/* Risk labels */
+.risk-level {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #05121a;
+  font-weight: 700;
+}
+
+.risk-level.low {
+  background: linear-gradient(90deg, #e6fff3, #d6fff0);
+  color: #00784a;
+}
+
+.risk-level.medium {
+  background: linear-gradient(90deg, #fff6e7, #fff0d6);
+  color: #8a5a00;
+}
+
+.risk-level.high,
+.risk-level.critical {
+  background: linear-gradient(90deg, #ffecec, #ffd6d6);
+  color: #7a1616;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: transparent;
+}
+
+table th,
+table td {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+}
+
+table th {
+  background: transparent;
+  color: #dff6ff;
+}
+
+/* Loading */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+}
+
+.loading::after {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  content: "";
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.footer {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  color: var(--muted);
+  text-align: center;
+}
+
+/* Main dashboard layout */
+.site-shell {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.sidebar {
+  position: sticky;
+  top: 20px;
+  flex-shrink: 0;
+  width: 250px;
+  min-height: calc(100vh - 120px);
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(20, 34, 54, 0.95),
+    rgba(13, 24, 40, 0.95)
+  );
+  box-shadow: 0 6px 18px rgba(2, 6, 23, 0.5);
+  color: var(--muted);
+}
+
+.sidebar h4 {
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+.sidebar a,
+.sidebar .nav-btn {
+  display: block;
+  width: 100%;
+  padding: 8px 6px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sidebar a:hover,
+.sidebar .nav-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  filter: none;
+}
+
+.main-area {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Auth transitions and social buttons */
+.auth-card {
+  transition: transform 0.28s ease, opacity 0.28s ease;
+}
+
+.auth-card.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px) scale(0.995);
+}
+
+.social-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.social-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.social-btn.google {
+  background: #db4437;
+  color: #ffffff;
+}
+
+.social-btn.apple {
+  background: #111111;
+  color: #ffffff;
+}
+
+.social-btn.facebook {
+  background: #1877f2;
+  color: #ffffff;
+}
+
+/* =====================================================
+   COMPACT DASHBOARD CHARTS
+   Matches the compact dashboard-card appearance
+===================================================== */
+.widgets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  margin-top: 22px !important;
+  align-items: stretch;
+}
+
+.chart-placeholder {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+  height: 315px;
+  min-height: 315px;
+  max-height: 315px;
+  padding: 18px 18px 16px;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  background: linear-gradient(
+    180deg,
+    rgba(19, 33, 53, 0.96),
+    rgba(12, 23, 39, 0.96)
+  );
+  box-shadow: var(--panel-shadow);
+  color: var(--muted);
+}
+
+.chart-placeholder h4 {
+  flex: 0 0 auto;
+  margin: 0 0 10px;
+  color: #ffffff !important;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* This is the important chart-size control */
+.chart-placeholder canvas {
+  display: block !important;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 245px !important;
+  min-height: 0 !important;
+  max-height: 245px !important;
+}
+
+#risk-history-chart,
+#exercises-chart,
+#mini-risk-chart {
+  width: 100% !important;
+  height: 245px !important;
+  max-height: 245px !important;
+}
+
+#dashboard-wrapper {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+#dashboard-wrapper.hidden,
+#auth-page.hidden {
+  display: none;
+}
+
+/* =====================================================
+   BACKGROUND IMAGE SLIDESHOW
+===================================================== */
+.background-slider {
+  position: fixed;
+  z-index: -3;
+  inset: 0;
+  overflow: hidden;
+  background-color: #07111f;
+}
+
+.background-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  transform: translateX(100%);
+  transition: transform 1.4s ease-in-out, opacity 1.4s ease-in-out;
+}
+
+.background-slide.active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.background-overlay {
+  position: fixed;
+  z-index: -2;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(5, 12, 25, 0.87),
+    rgba(5, 12, 25, 0.72)
+  );
+}
+
+.page-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+/* =====================================================
+   PREMIUM SPORTS-TECH DASHBOARD BACKGROUND
+===================================================== */
+
+#dashboard-wrapper {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+/* Main layered technical background */
+#dashboard-wrapper::before {
+  position: fixed;
+  z-index: -3;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+
+  background:
+    /* orange glow */
+    radial-gradient(
+      circle at 10% 18%,
+      rgba(255, 122, 24, 0.18),
+      transparent 24%
+    ),
+
+    /* teal glow */
+    radial-gradient(
+      circle at 88% 70%,
+      rgba(0, 194, 168, 0.16),
+      transparent 28%
+    ),
+
+    /* blue secondary glow */
+    radial-gradient(
+      circle at 62% 20%,
+      rgba(52, 152, 219, 0.08),
+      transparent 22%
+    ),
+
+    /* large horizontal light band */
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 36%,
+      rgba(255, 255, 255, 0.025) 45%,
+      rgba(255, 122, 24, 0.035) 50%,
+      rgba(0, 194, 168, 0.025) 56%,
+      transparent 66%,
+      transparent 100%
+    ),
+
+    /* fine grid horizontal */
+    linear-gradient(
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    ),
+
+    /* fine grid vertical */
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.025) 1px,
+      transparent 1px
+    ),
+
+    /* wider technical grid */
+    linear-gradient(
+      rgba(0, 194, 168, 0.02) 1px,
+      transparent 1px
+    ),
+
+    linear-gradient(
+      90deg,
+      rgba(255, 122, 24, 0.018) 1px,
+      transparent 1px
+    ),
+
+    linear-gradient(
+      180deg,
+      rgba(5, 12, 24, 0.18),
+      rgba(8, 17, 31, 0.10)
+    );
+
+  background-size:
+    auto,
+    auto,
+    auto,
+    auto,
+    44px 44px,
+    44px 44px,
+    176px 176px,
+    176px 176px,
+    auto;
+}
+
+/* HUD rings + dotted sports-tech layer */
+#dashboard-wrapper::after {
+  position: fixed;
+  z-index: -2;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+
+  background:
+    /* dotted matrix */
+    radial-gradient(
+      circle,
+      rgba(255, 255, 255, 0.05) 1px,
+      transparent 1.4px
+    ),
+
+    /* top-right HUD ring */
+    radial-gradient(
+      circle at 92% 10%,
+      transparent 0 72px,
+      rgba(0, 194, 168, 0.06) 73px 74px,
+      transparent 75px 103px,
+      rgba(255, 122, 24, 0.045) 104px 105px,
+      transparent 106px
+    ),
+
+    /* lower-left HUD ring */
+    radial-gradient(
+      circle at 8% 85%,
+      transparent 0 110px,
+      rgba(255, 122, 24, 0.05) 111px 112px,
+      transparent 113px 146px,
+      rgba(0, 194, 168, 0.04) 147px 148px,
+      transparent 149px
+    );
+
+  background-size:
+    28px 28px,
+    auto,
+    auto;
+
+  opacity: 0.8;
+}
+
+/* Decorative technical strokes */
+.main-area {
+  position: relative;
+}
+
+.main-area::before {
+  position: absolute;
+  z-index: -1;
+  top: 30px;
+  right: 20px;
+  width: 250px;
+  height: 140px;
+  pointer-events: none;
+  content: "";
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 194, 168, 0.16),
+      rgba(0, 194, 168, 0)
+    ) top left / 160px 1px no-repeat,
+
+    linear-gradient(
+      90deg,
+      rgba(255, 122, 24, 0.12),
+      rgba(255, 122, 24, 0)
+    ) 40px 36px / 200px 1px no-repeat,
+
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.07),
+      rgba(255, 255, 255, 0)
+    ) 90px 72px / 140px 1px no-repeat;
+}
+
+.main-area::after {
+  position: absolute;
+  z-index: -1;
+  left: 10px;
+  bottom: 40px;
+  width: 180px;
+  height: 180px;
+  pointer-events: none;
+  content: "";
+
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 122, 24, 0.025) 0 1px,
+      transparent 1px 16px
+    );
+
+  mask-image: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.9),
+    transparent 70%
+  );
+}
+
+/* Slight glass lift so the richer background still reads well */
+.card,
+.chart-placeholder,
+.profile-section,
+.sidebar,
+.detail-card {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Soft illuminated edge around major content panels */
+.card,
+.chart-placeholder,
+.profile-section {
+  box-shadow:
+    0 14px 36px rgba(2, 6, 23, 0.44),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+/* Gentle motion sweep */
+@keyframes techSweep {
+  0% {
+    transform: translateX(-20%);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 0.25;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+
+  80% {
+    opacity: 0.25;
+  }
+
+  100% {
+    transform: translateX(120%);
+    opacity: 0;
+  }
+}
+
+.site-shell::before {
+  position: fixed;
+  z-index: -1;
+  top: 0;
+  left: -35%;
+  width: 34%;
+  height: 100vh;
+  pointer-events: none;
+  content: "";
+
+  background: linear-gradient(
+    110deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.01) 30%,
+    rgba(0, 194, 168, 0.025) 48%,
+    rgba(255, 122, 24, 0.025) 52%,
+    rgba(255, 255, 255, 0.01) 70%,
+    transparent 100%
+  );
+
+  animation: techSweep 12s linear infinite;
+}
+
+/* Disable animated sweep for users who prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  .site-shell::before {
+    animation: none;
+    display: none;
+  }
+}
+
+/* Keep the decorative layers softer on smaller screens */
+@media (max-width: 900px) {
+  #dashboard-wrapper::after {
+    opacity: 0.45;
+  }
+
+  .main-area::before,
+  .main-area::after {
+    display: none;
+  }
+}
+
+
+/* =====================================================
+   CLEAN COLOR POLISH
+   More color, still simple and readable
+===================================================== */
+
+/* Softer but richer overall background */
+body {
+  background:
+    radial-gradient(
+      circle at 8% 12%,
+      rgba(255, 122, 24, 0.22),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 92% 78%,
+      rgba(0, 194, 168, 0.18),
+      transparent 28%
+    ),
+    linear-gradient(
+      rgba(255, 255, 255, 0.022) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.022) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      180deg,
+      #08111f 0%,
+      #0b1524 55%,
+      #0d1828 100%
+    );
+
+  background-size:
+    auto,
+    auto,
+    48px 48px,
+    48px 48px,
+    auto;
+}
+
+/* Reduce the busy HUD layer from the previous version */
+#dashboard-wrapper::after {
+  opacity: 0.35;
+}
+
+.site-shell::before {
+  opacity: 0.45;
+}
+
+/* More colorful but clean sidebar */
+.sidebar {
+  border-color: rgba(0, 194, 168, 0.14);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 34, 54, 0.97),
+      rgba(13, 24, 40, 0.97)
+    );
+  box-shadow:
+    0 16px 36px rgba(2, 6, 23, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.sidebar h4 {
+  color: #ffffff;
+}
+
+.sidebar .nav-btn:hover,
+.sidebar a:hover {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 122, 24, 0.12),
+      rgba(0, 194, 168, 0.08)
+    );
+  color: #ffffff;
+}
+
+/* Major content panels */
+.profile-section,
+.detail-card,
+.card,
+.chart-placeholder {
+  border: 1px solid rgba(148, 163, 184, 0.13);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20, 32, 50, 0.95),
+      rgba(12, 24, 40, 0.93)
+    );
+  box-shadow:
+    0 16px 40px rgba(2, 6, 23, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+/* Gentle colored edge */
+.profile-section,
+.detail-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-section::before,
+.detail-card::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  content: "";
+  background:
+    linear-gradient(
+      90deg,
+      var(--accent),
+      var(--accent-2)
+    );
+  opacity: 0.8;
+}
+
+/* Headings get a subtle accent */
+.profile-section h3,
+.profile-section h4,
+.detail-card h3,
+.detail-card h4 {
+  color: #ffffff;
+}
+
+.profile-section h3 {
+  border-bottom-color: rgba(0, 194, 168, 0.14);
+}
+
+/* Keep body text readable */
+.profile-section p,
+.detail-card p,
+.profile-section li,
+.detail-card li {
+  color: #b5c0cc;
+}
+
+.profile-section strong,
+.detail-card strong {
+  color: #eaf3fb;
+}
+
+/* =====================================================
+   COACH CONNECTION STATUS FIX
+===================================================== */
+
+.risk-level.connected {
+  background:
+    linear-gradient(
+      90deg,
+      #caffea,
+      #9ff4d6
+    );
+  color: #075b43 !important;
+  box-shadow: 0 0 0 1px rgba(0, 194, 168, 0.18);
+}
+
+.risk-level.pending {
+  background:
+    linear-gradient(
+      90deg,
+      #fff2c9,
+      #ffd98a
+    );
+  color: #795200 !important;
+}
+
+.risk-level.rejected {
+  background:
+    linear-gradient(
+      90deg,
+      #ffe2e2,
+      #ffbcbc
+    );
+  color: #7b1d1d !important;
+}
+
+/* Slightly brighter default risk badges */
+.risk-level.low {
+  box-shadow: 0 0 18px rgba(0, 193, 118, 0.08);
+}
+
+.risk-level.medium {
+  box-shadow: 0 0 18px rgba(255, 183, 77, 0.08);
+}
+
+.risk-level.high,
+.risk-level.critical {
+  box-shadow: 0 0 18px rgba(255, 107, 107, 0.08);
+}
+
+/* Buttons: keep the existing gradient but give them depth */
+button {
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+  transition:
+    transform 0.15s ease,
+    filter 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.20);
+}
+
+/* Recommendation cards get a small teal accent */
+#athlete-training-recommendations .detail-card {
+  border-left: 3px solid rgba(0, 194, 168, 0.65);
+}
+
+/* Coach connection card gets a small orange accent */
+#coach-connection-content .detail-card {
+  border-left: 3px solid rgba(255, 122, 24, 0.65);
+}
+
+/* Improve form contrast */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  border-color: rgba(148, 163, 184, 0.14);
+  background: rgba(7, 17, 31, 0.58);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(0, 194, 168, 0.55);
+  box-shadow: 0 0 0 3px rgba(0, 194, 168, 0.08);
+}
+
+/* Keep decorative background simple on small displays */
+@media (max-width: 900px) {
+  #dashboard-wrapper::after,
+  .site-shell::before {
+    display: none;
+  }
+}
+
+
+/* =====================================================
+   MY COACH - POLISHED INTERIOR
+===================================================== */
+
+.my-coach-section {
+  overflow: hidden;
+}
+
+.my-coach-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.my-coach-header h3 {
+  margin: 4px 0 4px;
+  font-size: 28px;
+}
+
+.my-coach-header p {
+  margin: 0;
+  color: rgba(225, 235, 245, 0.66);
+}
+
+.section-eyebrow,
+.coach-small-label,
+.recommendation-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #ff8a1f;
+}
+
+.coach-header-icon,
+.recommendation-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 138, 31, 0.18);
+  border-radius: 15px;
+  background: rgba(255, 138, 31, 0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 21px;
+}
+
+/* Coach card */
+.coach-info-card {
+  position: relative;
+  overflow: hidden;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(20, 36, 57, 0.96),
+      rgba(14, 29, 47, 0.95)
+    );
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18);
+}
+
+.coach-info-card::after {
+  position: absolute;
+  top: -90px;
+  right: -80px;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(20, 205, 181, 0.09);
+  filter: blur(5px);
+  pointer-events: none;
+  content: "";
+}
+
+.coach-card-top {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.coach-avatar {
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(
+      135deg,
+      #ff8617,
+      #13cdb5
+    );
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  color: #08121f;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.coach-main-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.coach-main-info h4 {
+  margin: 3px 0;
+  color: #ffffff;
+  font-size: 22px;
+}
+
+.coach-email {
+  display: block;
+  overflow-wrap: anywhere;
+  color: rgba(220, 232, 243, 0.68);
+  font-size: 14px;
+}
+
+/* Connection status */
+.coach-status {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.coach-status-connected {
+  border: 1px solid rgba(24, 207, 164, 0.25);
+  background: rgba(24, 207, 164, 0.12);
+  color: #70f1ca;
+}
+
+.coach-status-connected .status-dot {
+  background: #31e6ae;
+  box-shadow: 0 0 9px rgba(49, 230, 174, 0.7);
+}
+
+.coach-status-pending {
+  border: 1px solid rgba(255, 190, 50, 0.20);
+  background: rgba(255, 190, 50, 0.10);
+  color: #ffd46a;
+}
+
+.coach-status-pending .status-dot {
+  background: #ffc44d;
+}
+
+.coach-status-rejected {
+  border: 1px solid rgba(255, 80, 80, 0.20);
+  background: rgba(255, 80, 80, 0.10);
+  color: #ff8a8a;
+}
+
+.coach-status-rejected .status-dot {
+  background: #ff6262;
+}
+
+/* Coach information */
+.coach-info-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 22px;
+}
+
+.coach-info-item {
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.info-label {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(210, 224, 237, 0.56);
+  font-size: 12px;
+}
+
+.coach-info-item strong {
+  color: #ffffff;
+}
+
+/* Recommendations */
+.recommendation-section {
+  margin-top: 34px;
+}
+
+.section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 16px;
+}
+
+.section-title-row h3 {
+  margin: 4px 0 0;
+}
+
+.coach-recommendation-card {
+  display: flex;
+  gap: 17px;
+  margin-bottom: 14px;
+  padding: 21px;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: 17px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(20, 36, 57, 0.94),
+      rgba(15, 31, 48, 0.93)
+    );
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.recommendation-accent {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 13px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 134, 23, 0.16),
+      rgba(19, 205, 181, 0.12)
+    );
+  font-size: 19px;
+}
+
+.recommendation-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.recommendation-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.recommendation-date {
+  color: rgba(210, 224, 237, 0.50);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.recommendation-content h4 {
+  margin: 7px 0 8px;
+  color: #ffffff;
+  font-size: 19px;
+}
+
+.recommendation-message {
+  margin: 0;
+  color: rgba(225, 235, 245, 0.82);
+  line-height: 1.6;
+}
+
+.recommendation-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 13px;
+  border-top: 1px solid rgba(255, 255, 255, 0.055);
+  color: rgba(210, 224, 237, 0.62);
+  font-size: 12px;
+}
+
+.recommendation-footer strong {
+  color: #e8f3fc;
+}
+
+.mini-coach-avatar {
+  width: 25px;
+  height: 25px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background:
+    linear-gradient(
+      135deg,
+      #ff8617,
+      #13cdb5
+    );
+  color: #07111d;
+  font-weight: 800;
+}
+
+.coach-empty-message {
+  position: relative;
+  z-index: 1;
+  margin: 20px 0 0;
+  color: rgba(225, 235, 245, 0.72);
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .my-coach-header,
+  .section-title-row {
+    align-items: flex-start;
+  }
+
+  .coach-card-top {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .coach-status {
+    margin-left: 74px;
+  }
+
+  .coach-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .coach-recommendation-card {
+    padding: 17px;
+  }
+
+  .recommendation-top {
+    flex-direction: column;
+    gap: 3px;
+  }
+}

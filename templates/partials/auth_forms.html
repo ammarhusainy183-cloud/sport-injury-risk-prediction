@@ -1,0 +1,156 @@
+<!-- Partial: Sign-in and Register forms -->
+<div id="auth-page" class="tab-content active">
+  <div class="auth-section">
+    <div class="auth-switch">
+      <button class="tab-button active" type="button" onclick="switchAuthTab('login')">Login</button>
+      <button class="tab-button" type="button" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <div id="login-form" class="tab-content active">
+      <div class="card auth-card" style="padding:18px">
+        <h3 style="margin-bottom:8px;color:#fff">Welcome back</h3>
+        <p class="auth-helper">Sign in to access your training dashboard.</p>
+        <div class="social-row">
+          <button class="social-btn google">Google</button>
+          <button class="social-btn facebook">Facebook</button>
+          <button class="social-btn apple">Apple</button>
+        </div>
+        <div id="login-alert"></div>
+        <form onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label for="login-email">Email</label>
+            <input type="email" id="login-email" required>
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" required>
+          </div>
+          <button type="submit">Login</button>
+        </form>
+        <p class="auth-helper"><a href="#" onclick="switchToForgotPassword(event)">Forgot password?</a></p>
+        <p class="auth-helper">New here? <a href="#" onclick="switchAuthTab('register'); return false;">Create an account</a></p>
+      </div>
+    </div>
+
+    <div id="forgot-password-form" class="tab-content hidden">
+      <h2>Forgot Password</h2>
+      <div id="forgot-password-alert"></div>
+      <form onsubmit="handleForgotPassword(event)">
+        <div class="form-group">
+          <label for="forgot-email">Email</label>
+          <input type="email" id="forgot-email" required>
+        </div>
+        <button type="submit">Send Reset Link</button>
+      </form>
+      <p><a href="#" onclick="switchAuthTab('reset-password')">I have a reset token</a></p>
+      <p><a href="#" onclick="switchAuthTab('login')">Back to login</a></p>
+    </div>
+
+    <div id="reset-password-form" class="tab-content hidden">
+      <h2>Reset Password</h2>
+      <div id="reset-password-alert"></div>
+      <form onsubmit="handleResetPassword(event)">
+        <div class="form-group">
+          <label for="reset-token">Reset Token</label>
+          <input type="text" id="reset-token" required>
+        </div>
+        <div class="form-group">
+          <label for="reset-password">New Password</label>
+          <input type="password" id="reset-password" required placeholder="Min 8 chars, 1 uppercase, 1 digit, 1 symbol">
+        </div>
+        <button type="submit">Reset Password</button>
+      </form>
+      <p><a href="#" onclick="switchAuthTab('login')">Back to login</a></p>
+    </div>
+
+    <div id="register-form" class="tab-content hidden">
+      <div class="card auth-card" style="padding:18px;margin-top:12px">
+        <h3 style="color:#fff">Join AthletePulse</h3>
+        <p class="auth-helper">Create your account and start tracking your next performance goal.</p>
+        <div id="register-alert"></div>
+        <form onsubmit="handleRegister(event)">
+          <div class="form-group">
+            <label for="reg-username">Username</label>
+            <input type="text" id="reg-username" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-email">Email</label>
+            <input type="email" id="reg-email" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" required>
+          </div>
+          <div class="form-group">
+            <label for="reg-role">Role</label>
+            <select id="reg-role" onchange="toggleAthleteFields()">
+              <option value="athlete">Athlete</option>
+              <option value="coach">Coach</option>
+            </select>
+          </div>
+          <div id="athlete-registration-fields" class="profile-section" style="padding:14px; margin-bottom:12px; border-radius:12px;">
+            <div class="row" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group">
+                <label for="reg-firstname">First Name</label>
+                <input type="text" id="reg-firstname" required>
+              </div>
+              <div class="form-group">
+                <label for="reg-lastname">Last Name</label>
+                <input type="text" id="reg-lastname" required>
+              </div>
+            </div>
+            <div class="row" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+              <div class="form-group">
+                <label for="reg-age">Age</label>
+                <input type="number" id="reg-age" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="reg-height">Height (cm)</label>
+                <input type="number" id="reg-height" step="0.1" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="reg-weight">Weight (kg)</label>
+                <input type="number" id="reg-weight" step="0.1" min="1" required>
+              </div>
+            </div>
+            <div class="row" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group">
+                <label for="reg-sport">Sport</label>
+                <select id="reg-sport" required>
+                  <option value="football">Football</option>
+                  <option value="basketball">Basketball</option>
+                  <option value="running">Running</option>
+                  <option value="tennis">Tennis</option>
+                  <option value="volleyball">Volleyball</option>
+                  <option value="swimming">Swimming</option>
+                  <option value="gymnastics">Gymnastics</option>
+                  <option value="cycling">Cycling</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="reg-experience">Years of Experience</label>
+                <input type="number" id="reg-experience" min="0" required>
+              </div>
+            </div>
+            <div class="row" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+              <div class="form-group">
+                <label for="reg-frequency">Training Frequency (times/week)</label>
+                <input type="number" id="reg-frequency" min="0" max="7" required>
+              </div>
+              <div class="form-group">
+                <label for="reg-coach-email">Coach Email (optional)</label>
+                <input type="email" id="reg-coach-email">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="reg-injury-history">Injury History (optional)</label>
+              <textarea id="reg-injury-history" rows="2" placeholder="Tell us about prior injuries or concerns"></textarea>
+            </div>
+          </div>
+          <button type="submit">Create account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
