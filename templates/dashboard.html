@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -406,8 +406,17 @@
 
 <!-- My Coach Page -->
 <div id="my-coach-page" class="tab-content hidden">
-    <div class="profile-section">
-        <h3>My Coach</h3>
+    <div class="profile-section my-coach-section">
+
+        <div class="my-coach-header">
+            <div>
+                <span class="section-eyebrow">ATHLETE SUPPORT</span>
+                <h3>My Coach</h3>
+                <p>Your coach connection and latest training advice.</p>
+            </div>
+
+            <div class="coach-header-icon">🤝</div>
+        </div>
 
         <div id="coach-connection-alert"></div>
 
@@ -415,12 +424,21 @@
             <p>Loading coach connection...</p>
         </div>
 
-        <div style="margin-top: 24px;">
-            <h3>Coach Training Recommendations</h3>
+        <div class="recommendation-section">
+            <div class="section-title-row">
+                <div>
+                    <span class="section-eyebrow">TRAINING GUIDANCE</span>
+                    <h3>Coach Training Recommendations</h3>
+                </div>
+
+                <div class="recommendation-icon">⚡</div>
+            </div>
+
             <div id="athlete-training-recommendations">
                 <p>Loading recommendations...</p>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -2398,25 +2416,57 @@
                 }
 
                 container.innerHTML = recommendations.map(item => `
-                    <div class="detail-card" style="margin-bottom:12px;">
-                        <h4>
-                            ${formatRecommendationType(
-                                item.recommendation_type
-                            )}
-                        </h4>
+                    <div class="coach-recommendation-card">
 
-                        <p>${escapeHtml(item.message)}</p>
+                        <div class="recommendation-accent">
+                            ⚡
+                        </div>
 
-                        <p style="opacity:0.75;font-size:0.9em;">
-                            From Coach
-                            ${escapeHtml(
-                                item.coach?.username || ''
-                            )}
-                            ·
-                            ${new Date(
-                                item.created_at
-                            ).toLocaleString()}
-                        </p>
+                        <div class="recommendation-content">
+
+                            <div class="recommendation-top">
+                                <span class="recommendation-label">
+                                    COACH ADVICE
+                                </span>
+
+                                <span class="recommendation-date">
+                                    ${new Date(
+                                        item.created_at
+                                    ).toLocaleDateString()}
+                                </span>
+                            </div>
+
+                            <h4>
+                                ${formatRecommendationType(
+                                    item.recommendation_type
+                                )}
+                            </h4>
+
+                            <p class="recommendation-message">
+                                ${escapeHtml(item.message)}
+                            </p>
+
+                            <div class="recommendation-footer">
+                                <span class="mini-coach-avatar">
+                                    ${
+                                        escapeHtml(
+                                            item.coach?.username || 'C'
+                                        ).charAt(0).toUpperCase()
+                                    }
+                                </span>
+
+                                <span>
+                                    Recommended by
+                                    <strong>
+                                        Coach ${escapeHtml(
+                                            item.coach?.username || ''
+                                        )}
+                                    </strong>
+                                </span>
+                            </div>
+
+                        </div>
+
                     </div>
                 `).join('');
 
@@ -2965,13 +3015,62 @@ function displayCoachConnection() {
 
     if (!currentCoachConnection) {
         container.innerHTML = `
-            <div class="detail-card">
-                <h4>No Coach Connected</h4>
-                <p>You are not currently connected to a coach.</p>
-                <p>
-                    You can request a coach by entering the coach's
-                    email during registration.
+            <div class="coach-info-card empty-coach-card">
+                <div class="coach-card-top">
+                    <div class="coach-avatar">?</div>
+
+                    <div>
+                        <span class="coach-small-label">
+                            COACH CONNECTION
+                        </span>
+                        <h4>No Coach Connected</h4>
+                    </div>
+                </div>
+
+                <p class="coach-empty-message">
+                    You are not currently connected to a coach.
+                    Search for an active coach below and send a connection request.
                 </p>
+
+                <div style="margin-top: 18px;">
+                    <button
+                        type="button"
+                        onclick="openCoachSearch()"
+                    >
+                        🔍 Search for a Coach
+                    </button>
+                </div>
+            </div>
+
+            <div id="coach-search-panel" class="detail-card hidden" style="margin-top: 18px;">
+                <h4>Find a Coach</h4>
+
+                <p style="margin-bottom: 14px;">
+                    Search using your coach's username or email address.
+                </p>
+
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <input
+                        type="text"
+                        id="coach-search-input"
+                        placeholder="Enter coach name or email"
+                        minlength="2"
+                        style="flex:1; min-width:220px;"
+                        onkeydown="if(event.key === 'Enter'){ searchForCoach(); }"
+                    >
+
+                    <button
+                        type="button"
+                        onclick="searchForCoach()"
+                    >
+                        Search
+                    </button>
+                </div>
+
+                <div
+                    id="coach-search-results"
+                    style="margin-top:18px;"
+                ></div>
             </div>
         `;
 
@@ -2982,17 +3081,14 @@ function displayCoachConnection() {
     const coach = currentCoachConnection.coach || {};
 
     let statusText = 'Pending Approval';
-    let statusClass = 'warning';
-    let statusIcon = '🟡';
+    let statusClass = 'coach-status-pending';
 
     if (status === 'accepted') {
         statusText = 'Connected';
-        statusClass = 'success';
-        statusIcon = '🟢';
+        statusClass = 'coach-status-connected';
     } else if (status === 'rejected') {
         statusText = 'Rejected';
-        statusClass = 'danger';
-        statusIcon = '🔴';
+        statusClass = 'coach-status-rejected';
     }
 
     const requestDate = currentCoachConnection.assigned_date
@@ -3001,36 +3097,278 @@ function displayCoachConnection() {
         ).toLocaleDateString()
         : 'Not available';
 
+    const coachName = escapeHtml(
+        coach.username || 'Coach'
+    );
+
+    const coachEmail = escapeHtml(
+        coach.email || 'Not available'
+    );
+
+    const initial = coachName
+        ? coachName.charAt(0).toUpperCase()
+        : 'C';
+
     container.innerHTML = `
-        <div class="detail-card">
-            <h4>${statusIcon} Coach Connection</h4>
+        <div class="coach-info-card">
 
-            <p>
-                <strong>Coach:</strong>
-                ${escapeHtml(coach.username || 'Coach')}
-            </p>
+            <div class="coach-card-top">
 
-            <p>
-                <strong>Email:</strong>
-                ${escapeHtml(coach.email || 'Not available')}
-            </p>
+                <div class="coach-avatar">
+                    ${initial}
+                </div>
 
-            <p>
-                <strong>Status:</strong>
-                <span class="risk-level ${statusClass}">
+                <div class="coach-main-info">
+                    <span class="coach-small-label">
+                        YOUR COACH
+                    </span>
+
+                    <h4>${coachName}</h4>
+
+                    <span class="coach-email">
+                        ${coachEmail}
+                    </span>
+                </div>
+
+                <span class="coach-status ${statusClass}">
+                    <span class="status-dot"></span>
                     ${statusText}
                 </span>
-            </p>
 
-            <p>
-                <strong>Request Date:</strong>
-                ${requestDate}
-            </p>
+            </div>
+
+            <div class="coach-info-grid">
+
+                <div class="coach-info-item">
+                    <span class="info-label">
+                        Connection
+                    </span>
+
+                    <strong>
+                        ${statusText}
+                    </strong>
+                </div>
+
+                <div class="coach-info-item">
+                    <span class="info-label">
+                        Request Date
+                    </span>
+
+                    <strong>
+                        ${requestDate}
+                    </strong>
+                </div>
+
+            </div>
+
         </div>
     `;
 }
- 
-         
+
+
+
+async function openCoachSearch() {
+    const panel = document.getElementById('coach-search-panel');
+    const input = document.getElementById('coach-search-input');
+    const results = document.getElementById('coach-search-results');
+
+    if (!panel) return;
+
+    panel.classList.remove('hidden');
+    panel.style.display = 'block';
+
+    if (results) {
+        results.innerHTML = `
+            <p style="opacity:0.8;">
+                Enter at least 2 characters to search for a coach.
+            </p>
+        `;
+    }
+
+    if (input) input.focus();
+}
+
+async function searchForCoach() {
+    const input = document.getElementById('coach-search-input');
+    const results = document.getElementById('coach-search-results');
+
+    if (!input || !results) return;
+
+    const searchTerm = input.value.trim();
+
+    if (searchTerm.length < 2) {
+        results.innerHTML = `
+            <div class="alert warning">
+                Please enter at least 2 characters.
+            </div>
+        `;
+        return;
+    }
+
+    results.innerHTML = `
+        <p style="opacity:0.8;">Searching for coaches...</p>
+    `;
+
+    try {
+        const response = await apiFetch(
+            `/coach/search?q=${encodeURIComponent(searchTerm)}`
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            results.innerHTML = `
+                <div class="alert error">
+                    ${escapeHtml(data.error || 'Could not search for coaches.')}
+                </div>
+            `;
+            return;
+        }
+
+        const coaches = Array.isArray(data.coaches)
+            ? data.coaches
+            : [];
+
+        if (coaches.length === 0) {
+            results.innerHTML = `
+                <div class="detail-card">
+                    <p>
+                        No active coaches were found for
+                        "<strong>${escapeHtml(searchTerm)}</strong>".
+                    </p>
+                </div>
+            `;
+            return;
+        }
+
+        results.innerHTML = coaches.map(coach => {
+            const username = escapeHtml(coach.username || 'Coach');
+            const email = escapeHtml(coach.email || 'No email available');
+
+            let actionHtml = `
+                <button
+                    type="button"
+                    onclick="requestCoachConnection(${Number(coach.user_id)})"
+                >
+                    Request to Connect
+                </button>
+            `;
+
+            if (coach.connection_status === 'pending') {
+                actionHtml = `
+                    <span class="risk-level warning">
+                        🟡 Request Pending
+                    </span>
+                `;
+            } else if (coach.connection_status === 'accepted') {
+                actionHtml = `
+                    <span class="risk-level success">
+                        🟢 Connected
+                    </span>
+                `;
+            } else if (coach.connection_status === 'rejected') {
+                actionHtml = `
+                    <button
+                        type="button"
+                        onclick="requestCoachConnection(${Number(coach.user_id)})"
+                    >
+                        Send Request Again
+                    </button>
+                `;
+            }
+
+            return `
+                <div class="detail-card" style="margin-bottom:12px;">
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        justify-content:space-between;
+                        gap:16px;
+                        flex-wrap:wrap;
+                    ">
+                        <div>
+                            <h4 style="margin-bottom:4px;">
+                                ${username}
+                            </h4>
+                            <p style="margin:0;">
+                                ${email}
+                            </p>
+                        </div>
+
+                        <div>${actionHtml}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+    } catch (error) {
+        if (error.message !== 'SESSION_EXPIRED') {
+            results.innerHTML = `
+                <div class="alert error">
+                    Could not search for coaches. Please try again.
+                </div>
+            `;
+        }
+    }
+}
+
+async function requestCoachConnection(coachId) {
+    if (!coachId) return;
+
+    const confirmed = confirm(
+        'Send a connection request to this coach?'
+    );
+
+    if (!confirmed) return;
+
+    try {
+        const response = await apiFetch(
+            '/coach/request',
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    coach_id: coachId
+                })
+            }
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            showAlert(
+                data.error || 'Could not send the coach request.',
+                'error',
+                'coach-connection-alert'
+            );
+            return;
+        }
+
+        showAlert(
+            data.message || 'Coach connection request sent.',
+            'success',
+            'coach-connection-alert'
+        );
+
+        currentCoachConnection = data.connection || null;
+
+        displayCoachConnection();
+
+        if (typeof loadAthleteTrainingRecommendations === 'function') {
+            loadAthleteTrainingRecommendations();
+        }
+
+    } catch (error) {
+        if (error.message !== 'SESSION_EXPIRED') {
+            showAlert(
+                'Could not send the coach request. Please try again.',
+                'error',
+                'coach-connection-alert'
+            );
+        }
+    }
+}
+
+
             function logout()
             {
             stopDashboardAutoRefresh();
