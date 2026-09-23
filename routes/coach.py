@@ -95,6 +95,198 @@ def get_latest_assessment(athlete_id):
 
 
 # =========================================================
+# ATHLETE COACH SEARCH AND CONNECTION REQUEST
+# =========================================================
+
+@coach_bp.route("/search", methods=["GET"])
+@jwt_required()
+def search_coaches():
+    """
+    Search active coach accounts by username or email.
+
+    This endpoint is intended for athletes who want to find
+    a coach from the My Coach page.
+    """
+
+    try:
+        user_id = int(get_jwt_identity())
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid authentication identity"}), 401
+
+    athlete = db.session.get(User, user_id)
+
+    if not athlete:
+        return jsonify({"error": "User not found"}), 404
+
+    if athlete.role != UserRole.ATHLETE:
+        return jsonify({"error": "Only athletes can search for coaches"}), 403
+
+    if not athlete.is_active:
+        return jsonify({"error": "Athlete account is inactive"}), 403
+
+    search_term = request.args.get("q", "").strip()
+
+    if len(search_term) < 2:
+        return jsonify({
+            "error": "Enter at least 2 characters to search for a coach"
+        }), 400
+
+    pattern = f"%{search_term}%"
+
+    coaches = User.query.filter(
+        User.role == UserRole.COACH,
+        User.is_active.is_(True),
+        db.or_(
+            User.username.ilike(pattern),
+            User.email.ilike(pattern)
+        )
+    ).order_by(User.username.asc()).limit(20).all()
+
+    current_connection = CoachAthlete.query.filter_by(
+        athlete_id=athlete.id
+    ).first()
+
+    results = []
+
+    for coach in coaches:
+        connection = CoachAthlete.query.filter_by(
+            coach_id=coach.id,
+            athlete_id=athlete.id
+        ).first()
+
+        results.append({
+            "user_id": coach.id,
+            "username": coach.username,
+            "email": coach.email,
+            "connection_status": (
+                connection.status.value
+                if connection
+                else None
+            ),
+            "is_current_coach": (
+                current_connection is not None
+                and current_connection.coach_id == coach.id
+                and current_connection.status == ConnectionStatus.ACCEPTED
+            )
+        })
+
+    return jsonify({
+        "coaches": results,
+        "total": len(results)
+    }), 200
+
+
+@coach_bp.route("/request", methods=["POST"])
+@jwt_required()
+def request_coach_connection():
+    """
+    Send a connection request from the current athlete to a coach.
+    """
+
+    try:
+        athlete_id = int(get_jwt_identity())
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid authentication identity"}), 401
+
+    athlete = db.session.get(User, athlete_id)
+
+    if not athlete:
+        return jsonify({"error": "User not found"}), 404
+
+    if athlete.role != UserRole.ATHLETE:
+        return jsonify({"error": "Only athletes can request a coach"}), 403
+
+    if not athlete.is_active:
+        return jsonify({"error": "Athlete account is inactive"}), 403
+
+    data = request.get_json(silent=True) or {}
+
+    try:
+        coach_id = int(data.get("coach_id"))
+    except (TypeError, ValueError):
+        return jsonify({"error": "A valid coach_id is required"}), 400
+
+    if coach_id == athlete.id:
+        return jsonify({"error": "You cannot connect to yourself"}), 400
+
+    coach = db.session.get(User, coach_id)
+
+    if not coach:
+        return jsonify({"error": "Coach not found"}), 404
+
+    if coach.role != UserRole.COACH:
+        return jsonify({"error": "Selected user is not a coach"}), 400
+
+    if not coach.is_active:
+        return jsonify({"error": "This coach account is inactive"}), 400
+
+    # An athlete may have only one coach connection at a time.
+    existing_for_athlete = CoachAthlete.query.filter_by(
+        athlete_id=athlete.id
+    ).first()
+
+    if existing_for_athlete:
+        if existing_for_athlete.coach_id == coach.id:
+            if existing_for_athlete.status == ConnectionStatus.PENDING:
+                return jsonify({
+                    "error": "You already have a pending request to this coach"
+                }), 409
+
+            if existing_for_athlete.status == ConnectionStatus.ACCEPTED:
+                return jsonify({
+                    "error": "You are already connected to this coach"
+                }), 409
+
+            if existing_for_athlete.status == ConnectionStatus.REJECTED:
+                existing_for_athlete.status = ConnectionStatus.PENDING
+                existing_for_athlete.assigned_date = datetime.utcnow()
+                existing_for_athlete.responded_at = None
+
+                try:
+                    db.session.commit()
+                    return jsonify({
+                        "message": "Coach connection request sent",
+                        "connection": existing_for_athlete.to_dict()
+                    }), 201
+                except Exception:
+                    db.session.rollback()
+                    current_app.logger.exception(
+                        "Failed to resend coach connection request"
+                    )
+                    return jsonify({
+                        "error": "Could not send coach connection request"
+                    }), 500
+
+        return jsonify({
+            "error": "You already have a coach connection. Disconnect from your current coach before requesting another coach."
+        }), 409
+
+    connection = CoachAthlete(
+        coach_id=coach.id,
+        athlete_id=athlete.id,
+        status=ConnectionStatus.PENDING
+    )
+
+    try:
+        db.session.add(connection)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Coach connection request sent",
+            "connection": connection.to_dict()
+        }), 201
+
+    except Exception:
+        db.session.rollback()
+        current_app.logger.exception(
+            "Failed to create coach connection request"
+        )
+        return jsonify({
+            "error": "Could not send coach connection request"
+        }), 500
+
+
+# =========================================================
 # PENDING CONNECTION REQUESTS
 # =========================================================
 
