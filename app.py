@@ -69,17 +69,19 @@ def create_app(config_name="development"):
     @app.route("/api/db-test", methods=["GET"])
     def db_test():
         """
-        Temporary endpoint used to verify the database connection
-        and count registered users.
-
-        Remove this endpoint after testing.
+        Temporary database diagnostic endpoint.
+        Remove this endpoint after the database connection
+        has been confirmed.
         """
 
         try:
-            # Identify the database backend
+            # Check whether DATABASE_URL exists
+            database_url = os.environ.get("DATABASE_URL")
+
+            # Get the database backend being used by SQLAlchemy
             database_type = db.engine.url.get_backend_name()
 
-            # Count users in the users table
+            # Count registered users
             user_count = db.session.execute(
                 text("SELECT COUNT(*) FROM users")
             ).scalar()
@@ -87,6 +89,12 @@ def create_app(config_name="development"):
             return jsonify({
                 "status": "success",
                 "database_type": database_type,
+                "database_url_exists": bool(database_url),
+                "database_url_prefix": (
+                    database_url.split("://")[0]
+                    if database_url and "://" in database_url
+                    else None
+                ),
                 "user_count": user_count
             }), 200
 
@@ -127,7 +135,7 @@ def create_app(config_name="development"):
 
 
 # =========================================================
-# CREATE APP INSTANCE
+# CREATE APPLICATION INSTANCE
 # =========================================================
 
 app = create_app(
