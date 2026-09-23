@@ -1,7 +1,6 @@
-from flask import Flask, render_template, jsonify, current_app
+from flask import Flask, render_template, jsonify
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-from sqlalchemy import text
 import os
 
 from config import config
@@ -61,52 +60,6 @@ def create_app(config_name="development"):
             "status": "healthy",
             "message": "Sport Injury Risk Prediction Portal is running"
         }), 200
-
-    # =========================================================
-    # TEMPORARY DATABASE TEST
-    # =========================================================
-
-    @app.route("/api/db-test", methods=["GET"])
-    def db_test():
-        """
-        Temporary database diagnostic endpoint.
-        Remove this endpoint after the database connection
-        has been confirmed.
-        """
-
-        try:
-            # Check whether DATABASE_URL exists
-            database_url = os.environ.get("DATABASE_URL")
-
-            # Get the database backend being used by SQLAlchemy
-            database_type = db.engine.url.get_backend_name()
-
-            # Count registered users
-            user_count = db.session.execute(
-                text("SELECT COUNT(*) FROM users")
-            ).scalar()
-
-            return jsonify({
-                "status": "success",
-                "database_type": database_type,
-                "database_url_exists": bool(database_url),
-                "database_url_prefix": (
-                    database_url.split("://")[0]
-                    if database_url and "://" in database_url
-                    else None
-                ),
-                "user_count": user_count
-            }), 200
-
-        except Exception as error:
-            current_app.logger.exception(
-                "Database test failed"
-            )
-
-            return jsonify({
-                "status": "error",
-                "message": str(error)
-            }), 500
 
     # =========================================================
     # ERROR HANDLERS
