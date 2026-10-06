@@ -11,5 +11,5 @@ pandas==2.2.3
 
 Requests==2.31.0
 gunicorn==23.0.0
-psycopg2-binary
+psycopg[binary]
 joblib==1.4.2
