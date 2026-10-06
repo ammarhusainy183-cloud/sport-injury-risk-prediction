@@ -31,6 +31,7 @@ from models import (
     TrainingIntensity,
     RiskLevel,
     AlertStatus,
+    UserRole,
 )
 
 
@@ -74,7 +75,7 @@ EXERCISE_DATA = {
         (45, TrainingIntensity.LOW, 4.0, 380),
         (50, TrainingIntensity.MODERATE, 5.0, 450),
         (40, TrainingIntensity.LOW, 3.5, 330),
-        None,  # Rest day
+        None,
         (50, TrainingIntensity.MODERATE, 5.5, 480),
         (45, TrainingIntensity.LOW, 4.0, 360),
         (40, TrainingIntensity.LOW, 3.5, 320),
@@ -169,7 +170,6 @@ PROFILE_DATA = {
 
 def seed_demo_data():
 
-    # Make sure DATABASE_URL is present when running against Render.
     database_url = os.environ.get("DATABASE_URL")
 
     if database_url:
@@ -198,7 +198,9 @@ def seed_demo_data():
             # Find existing user
             # ------------------------------------------------
 
-            athlete = User.query.filter_by(username=username).first()
+            athlete = User.query.filter_by(
+                username=username
+            ).first()
 
             if not athlete:
                 print(f"ERROR: User '{username}' was not found.")
@@ -217,6 +219,7 @@ def seed_demo_data():
             profile_values = PROFILE_DATA[username]
 
             if not profile:
+
                 profile = UserProfile(
                     user_id=athlete.id,
                     first_name=profile_values["first_name"],
@@ -225,26 +228,36 @@ def seed_demo_data():
                     weight=profile_values["weight"],
                     age=profile_values["age"],
                     sport=Sport.FOOTBALL,
-                    years_of_experience=profile_values["years_of_experience"],
-                    training_frequency=profile_values["training_frequency"],
-                    injury_history=profile_values["injury_history"],
+                    years_of_experience=profile_values[
+                        "years_of_experience"
+                    ],
+                    training_frequency=profile_values[
+                        "training_frequency"
+                    ],
+                    injury_history=profile_values[
+                        "injury_history"
+                    ],
                 )
 
                 db.session.add(profile)
 
             else:
+
                 profile.sport = Sport.FOOTBALL
                 profile.first_name = profile_values["first_name"]
                 profile.last_name = profile_values["last_name"]
                 profile.height = profile_values["height"]
                 profile.weight = profile_values["weight"]
                 profile.age = profile_values["age"]
+
                 profile.years_of_experience = profile_values[
                     "years_of_experience"
                 ]
+
                 profile.training_frequency = profile_values[
                     "training_frequency"
                 ]
+
                 profile.injury_history = profile_values[
                     "injury_history"
                 ]
@@ -270,6 +283,7 @@ def seed_demo_data():
             ).all()
 
             for assessment in old_assessments:
+
                 alert = HighRiskAlert.query.filter_by(
                     assessment_id=assessment.id
                 ).first()
@@ -294,7 +308,9 @@ def seed_demo_data():
 
                 duration, intensity, distance, calories = exercise_data
 
-                exercise_date = start_date + timedelta(days=day_index)
+                exercise_date = start_date + timedelta(
+                    days=day_index
+                )
 
                 exercise = ExerciseRoutine(
                     user_id=athlete.id,
@@ -351,6 +367,30 @@ def seed_demo_data():
                     else 0.0
                 )
 
+                if settings["target_risk"] == RiskLevel.LOW:
+
+                    recommendations = (
+                        "Maintain regular recovery and hydration.\n"
+                        "Continue monitoring training intensity.\n"
+                        "Complete adequate warm-up before training."
+                    )
+
+                elif settings["target_risk"] == RiskLevel.MEDIUM:
+
+                    recommendations = (
+                        "Reduce training intensity.\n"
+                        "Increase recovery time between sessions.\n"
+                        "Monitor fatigue and muscle soreness."
+                    )
+
+                else:
+
+                    recommendations = (
+                        "Reduce high-intensity training immediately.\n"
+                        "Schedule adequate recovery and rest.\n"
+                        "Monitor for pain or signs of injury."
+                    )
+
                 assessment = InjuryRiskAssessment(
                     user_id=athlete.id,
                     assessment_date=assessment_date,
@@ -358,23 +398,7 @@ def seed_demo_data():
                     injury_percentage=percentage,
                     overtraining_detected=is_overtraining,
                     overtraining_score=overtraining_score,
-                    recommendations=(
-                        "Maintain regular recovery and hydration.\n"
-                        "Continue monitoring training intensity.\n"
-                        "Complete adequate warm-up before training."
-                    )
-                    if settings["target_risk"] == RiskLevel.LOW
-                    else (
-                        "Reduce training intensity.\n"
-                        "Increase recovery time between sessions.\n"
-                        "Monitor fatigue and muscle soreness."
-                    )
-                    if settings["target_risk"] == RiskLevel.MEDIUM
-                    else (
-                        "Reduce high-intensity training immediately.\n"
-                        "Schedule adequate recovery and rest.\n"
-                        "Monitor for pain or signs of injury."
-                    ),
+                    recommendations=recommendations,
                     model_version=marker,
                     high_volume_training=(
                         settings["target_risk"]
@@ -389,7 +413,8 @@ def seed_demo_data():
                         in [RiskLevel.HIGH, RiskLevel.CRITICAL]
                     ),
                     previous_injury_risk=(
-                        username in ["LuqmanHakim", "Hanzo", "Kaizo"]
+                        username
+                        in ["LuqmanHakim", "Hanzo", "Kaizo"]
                     ),
                 )
 
@@ -406,11 +431,15 @@ def seed_demo_data():
                     and day_index == len(percentages) - 1
                 ):
 
+                    # FIX:
+                    # PostgreSQL uses the UserRole enum.
+                    # Do NOT use role="coach".
                     coach = User.query.filter_by(
-                        role="coach"
+                        role=UserRole.COACH
                     ).first()
 
                     if coach:
+
                         alert = HighRiskAlert(
                             athlete_id=athlete.id,
                             coach_id=coach.id,
@@ -430,6 +459,7 @@ def seed_demo_data():
             print("  Profile: Football")
             print("  Exercise history: 7 days")
             print("  Assessment history: 7 days")
+
             print(
                 f"  Target result: "
                 f"{settings['target_risk'].value.upper()}"
@@ -441,11 +471,13 @@ def seed_demo_data():
         print("\n==========================================")
         print(" DEMO DATA SETUP COMPLETE")
         print("==========================================")
+
         print("\nAthletes:")
         print("  aynnradn     -> LOW")
         print("  LuqmanHakim  -> MEDIUM")
         print("  Hanzo        -> HIGH")
         print("  Kaizo        -> HIGH + OVERTRAINING")
+
         print("\nAll athletes are configured as FOOTBALL.")
 
 
