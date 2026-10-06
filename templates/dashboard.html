@@ -1946,26 +1946,110 @@
             }
         }
         async function loadCoachDashboard() {
-            try {
-                const response = await apiFetch('/coach/dashboard');
-                if (response.ok) {
-                    const data = await response.json();
-                    const dashboard = data.dashboard;
-                    document.getElementById('coach-total-athletes').textContent = dashboard.total_athletes;
-                    const pendingElement = document.getElementById('coach-pending-requests');
-                    if (pendingElement) pendingElement.textContent = dashboard.pending_requests || 0;
-                    document.getElementById('coach-high-risk').textContent = dashboard.high_risk_athletes;
-                    document.getElementById('coach-overtraining').textContent = dashboard.athletes_with_overtraining;
- 
-                    document.getElementById('coach-high-risk-card').classList.toggle('warning', dashboard.high_risk_athletes > 0);
-                    document.getElementById('coach-overtraining-card').classList.toggle('warning', dashboard.athletes_with_overtraining > 0);
-                }
-            } catch (error) {
-                if (error.message !== 'SESSION_EXPIRED') {
-                    showAlert('Could not load dashboard stats.', 'error', 'coach-alert');
-                }
+    try {
+        const response = await apiFetch('/coach/dashboard');
+
+        if (response.ok) {
+            const data = await response.json();
+            const dashboard = data.dashboard;
+
+            // Main statistics
+            document.getElementById('coach-total-athletes').textContent =
+                dashboard.total_athletes || 0;
+
+            const pendingElement =
+                document.getElementById('coach-pending-requests');
+
+            if (pendingElement) {
+                pendingElement.textContent =
+                    dashboard.pending_requests || 0;
+            }
+
+            // Risk statistics
+            const lowRiskElement =
+                document.getElementById('coach-low-risk');
+
+            const mediumRiskElement =
+                document.getElementById('coach-medium-risk');
+
+            const highRiskElement =
+                document.getElementById('coach-high-risk');
+
+            const overtrainingElement =
+                document.getElementById('coach-overtraining');
+
+            if (lowRiskElement) {
+                lowRiskElement.textContent =
+                    dashboard.low_risk_athletes || 0;
+            }
+
+            if (mediumRiskElement) {
+                mediumRiskElement.textContent =
+                    dashboard.medium_risk_athletes || 0;
+            }
+
+            if (highRiskElement) {
+                highRiskElement.textContent =
+                    dashboard.high_risk_athletes || 0;
+            }
+
+            if (overtrainingElement) {
+                overtrainingElement.textContent =
+                    dashboard.athletes_with_overtraining || 0;
+            }
+
+            // Card highlighting
+            const lowRiskCard =
+                document.getElementById('coach-low-risk-card');
+
+            const mediumRiskCard =
+                document.getElementById('coach-medium-risk-card');
+
+            const highRiskCard =
+                document.getElementById('coach-high-risk-card');
+
+            const overtrainingCard =
+                document.getElementById('coach-overtraining-card');
+
+            if (lowRiskCard) {
+                lowRiskCard.classList.toggle(
+                    'success',
+                    (dashboard.low_risk_athletes || 0) > 0
+                );
+            }
+
+            if (mediumRiskCard) {
+                mediumRiskCard.classList.toggle(
+                    'warning',
+                    (dashboard.medium_risk_athletes || 0) > 0
+                );
+            }
+
+            if (highRiskCard) {
+                highRiskCard.classList.toggle(
+                    'danger',
+                    (dashboard.high_risk_athletes || 0) > 0
+                );
+            }
+
+            if (overtrainingCard) {
+                overtrainingCard.classList.toggle(
+                    'warning',
+                    (dashboard.athletes_with_overtraining || 0) > 0
+                );
             }
         }
+
+    } catch (error) {
+        if (error.message !== 'SESSION_EXPIRED') {
+            showAlert(
+                'Could not load dashboard stats.',
+                'error',
+                'coach-alert'
+            );
+        }
+    }
+}
  
         async function loadCoachRequests() {
             const container = document.getElementById('coach-requests-container');
