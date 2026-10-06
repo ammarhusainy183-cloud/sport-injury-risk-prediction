@@ -65,3 +65,4 @@ instance/
 # Node (if using frontend tools)
 node_modules/
 npm-debug.log
+venv311/
